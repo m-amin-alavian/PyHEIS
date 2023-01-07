@@ -5,6 +5,7 @@ import pyodbc
 
 import pathlib
 import os
+import sqlite3
 
 from .utils import build_year_interval
 from .general import Defults, other_metadata, columns_properties
@@ -92,6 +93,28 @@ def extract_csv_files(from_year=None, to_year=None, raw_data_directory=Defults.r
 
     for year in range(from_year, to_year):
         extract_tables_as_csv(year, raw_data_directory=raw_data_directory, csv_directory=csv_directory)
+
+
+def extract_raw_data_to_db(from_year=None, to_year=None, raw_data_directory=Defults.raw_dir, directory=Defults.local_directory):
+    from_year, to_year = build_year_interval(from_year=from_year, to_year=to_year)
+    sql_connection = sqlite3.connect(directory.joinpath("raw_data.db"))
+    for year in range(from_year, to_year):
+        access_file = AccessFile(year, raw_data_directory)
+        access_file.create_connection()
+        available_tables = access_file.get_tables_list()
+        for table_name in tqdm(available_tables, desc=f"Extracting tables from HEIS{year}", unit="table"):
+            try:
+                df = access_file.get_table(table_name)
+            except (pyodbc.ProgrammingError, pyodbc.OperationalError):
+                tqdm.write(f"table {table_name} from {year} failed to convert")
+                continue
+            table_name = _change_1380_table_names(year, table_name)
+            for column in df.columns:
+                try:
+                    df.loc[:, column] = pd.to_numeric(df[column], downcast='unsigned')
+                except ValueError:
+                    continue
+            df.to_sql(table_name, sql_connection, if_exists='replace', index=False)
 
 
 def _select_year(dictionary:dict, year:int) -> int|None:
