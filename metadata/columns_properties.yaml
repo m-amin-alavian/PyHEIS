@@ -461,7 +461,7 @@ INCOME_BASE_ITEMS:
 
     income_job_code: &income_job_code
         new_name: "Job_Code"
-        type: "unsigned"
+        type: "string"
     
     income_activity_status: &income_activity_status
         new_name: "Activity_Status"
@@ -469,11 +469,22 @@ INCOME_BASE_ITEMS:
 
     income_workplace_activity: &income_workplace_activity
         new_name: "Workplace_Activity"
-        type: "unsigned"
+        type: "string"
 
-    income_sector: &income_sector
+    income_sector_base: &income_sector_base
         new_name: "Sector"
         type: "category"
+    income_sector_1: &income_sector_1
+        <<: *income_sector_base
+        categories:
+            1: "Public"
+            2: "Private"
+    income_sector_2: &income_sector_2
+        <<: *income_sector_base
+        categories:
+            1: "Public"
+            2: "Cooperative"
+            3: "Private"
 
     income_working_hours_per_day: &income_working_hours_per_day
         new_name: "Working_Hours_per_Day"
@@ -525,88 +536,89 @@ employment_income:
     columns:
         <<: *income_base_columns
         COL01: *income_member_number
-        DyCol01: *income_member_number
+        DYCOL01: *income_member_number
 
         COL02:
             1369: *income_job_code
             1374: *income_activity_status
-        DyCol02:
+        DYCOL02:
             1384: *income_activity_status
 
         COL03:
             1369: *income_workplace_activity
             1374: *income_job_code
-        DyCol03:
+        DYCOL03:
             1384: *income_job_code
 
         COL04:
-            1369: *income_sector
+            1369: *income_sector_1
             1374: *income_workplace_activity
-        DyCol04:
+        DYCOL04:
             1384: *income_workplace_activity
 
         COL05:
             1369: null
             1370: *income_monthly_gross
-            1374: *income_sector
-        DyCol05:
-            1384: *income_sector
+            1374: *income_sector_1
+            1376: *income_sector_2
+        DYCOL05:
+            1384: *income_sector_2
         
         COL06:
             1369: *income_yearly_gross
             1374: *income_monthly_gross
-        DyCol6:
+        DYCOL06:
             1384: *income_working_hours_per_day
 
-        Col07:
+        COL07:
             1369: null
             1370: *income_monthly_continuous
             1374: *income_yearly_gross
-        DyCol07:
+        DYCOL07:
             1384: *income_working_day_per_week
 
-        Col08:
+        COL08:
             1369: *income_yearly_continuous
             1374: *income_monthly_continuous
-        DyCol08:
+        DYCOL08:
             1384: *income_monthly_gross
 
-        Col09:
+        COL09:
             1369: null
             1370: *income_monthly_temporary
             1374: *income_yearly_continuous
-        DyCol09:
+        DYCOL09:
             1384: *income_yearly_gross
 
-        Col10:
+        COL10:
             1369: *income_yearly_temporary
             1374: *income_monthly_temporary
-        DyCol10:
+        DYCOL10:
             1384: *income_monthly_gross
 
-        Col11:
+        COL11:
             1369: null
             1370: *income_monthly_net
             1374: *income_yearly_temporary
-        DyCol11:
+        DYCOL11:
             1384: *income_yearly_continuous
 
-        Col12:
+        COL12:
             1369: *income_yearly_net
             1374: *income_monthly_net
-        DyCol12:
+        DYCOL12:
             1384: *income_monthly_temporary
 
-        Col13:
+        COL13:
             1369: null
             1374: *income_yearly_net
-        DyCol13:
+        DYCOL13:
             1384: *income_yearly_temporary
 
-        DyCol14:
+        DYCOL14:
             1384: *income_monthly_net
 
-        DyCol15:
+        DYCOL15:
             1384: *income_yearly_net
 
 

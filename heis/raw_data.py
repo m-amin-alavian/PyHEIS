@@ -5,12 +5,14 @@ import pyodbc
 import sys
 
 import pathlib
+import logging
 import os
 import sqlite3
 
 from .utils import build_year_interval
 from .general import Defults, other_metadata, columns_properties
 
+logging.basicConfig(filename="raw_data.log", level=logging.DEBUG)
 
 class AccessFile:
     def __init__(self, year, raw_data_directory=Defults.raw_dir):
@@ -18,13 +20,12 @@ class AccessFile:
         self.raw_data_directory = raw_data_directory
 
     def make_connection_string(self, directory):
+        files = [f.lower() for f in os.listdir(directory)]
         if sys.platform == "win32":
             join_string = "\\"
             driver = "Microsoft Access Driver (*.mdb, *.accdb)"
-            files = [f.lower() for f in os.listdir(directory)]
         else:
-            join_string = "/"
-            files = [f for f in os.listdir(directory)]
+            join_string = "/"   
             driver = "MDBTools"
 
         accdb_file = None
@@ -147,7 +148,7 @@ def _get_column_property(year, table_name, column, urban=None):
         property_collection = columns_properties[table_name]["columns"]["urban"][column]
     elif urban is False:
         property_collection = columns_properties[table_name]["columns"]["rural"][column]
-    print(f"{column}: {property_collection}")
+    logging.debug("{}: {}".format(column, property_collection))
     selected_year = _select_year(property_collection, year)
     if selected_year is None:
         selected_property = property_collection
@@ -161,14 +162,22 @@ def _build_file_name(year:int, table:str, urban:bool):
     file_name = f"{rural_urban}{year_part}{table}.csv"
     return file_name
 
-def _clean_table(df:pd.DataFrame):
+def _fix_bad_ids(df, year:int|None=None):
+    if year == 1374:
+        filt = df.iloc[:, 0].str.isnumeric()
+        df = df.loc[filt]
+    return df
+
+
+def _clean_table(df:pd.DataFrame, year:int|None=None):
     df = df.copy()
     for column in df.columns:
         if pd.api.types.is_numeric_dtype(df[column]):
             continue
-        for ch in ["\n", "\r", ",", "@", "-"]:
-            df.loc[:, column] = df.loc[:, column].str.replace(ch, "")
+        for ch in ["\n", "\r", ",", "@", "-", "+"]:
+            df.loc[:, column] = df.loc[:, column].str.replace(ch, "", regex=False)
     df = df.replace("\A\s*\Z", np.nan, regex=True)
+    df = _fix_bad_ids(df, year)
     return df
 
 def open_table_csv(year:int, table_name:str, urban:bool|None=None):
@@ -184,12 +193,12 @@ def open_table_csv(year:int, table_name:str, urban:bool|None=None):
         df = pd.read_csv(f"D:\\PyHEIS_Data\\3_csv_files\\{year}\\{file_name}", low_memory=False)
         dfc.append(df)
     table = pd.concat(dfc, axis="index", ignore_index=True)
-    table = _clean_table(table)
+    table = _clean_table(table, year)
     return table
 
 def apply_columns_properties(table, year, table_name, urban=None):
     for column in table.columns:
-        print(f"year: {year} column: {column}   ", end="\r")
+        logging.debug("year: {} column: {}   ".format(year, column))
         column_props = _get_column_property(year, table_name, column, urban)
 
         if "drop" in column_props:
@@ -221,11 +230,10 @@ def load_table_from_csv(year:int, table_name:str):
                 df = open_table_csv(year=year, table_name=table_name, urban=urban)
                 df = apply_columns_properties(df, year=year, table_name=table_name, urban=urban)
                 dfs.append(df)
-            return pd.concat(dfs, axis="index", ignore_index=True)
+            df = pd.concat(dfs, axis="index", ignore_index=True)
     except KeyError:
-        pass
-    df = open_table_csv(year=year, table_name=table_name)
-    df = apply_columns_properties(df, year=year, table_name=table_name)
+        df = open_table_csv(year=year, table_name=table_name)
+        df = apply_columns_properties(df, year=year, table_name=table_name)
     return df
 
 def make_parquet(year:int, table_name:str, parquets_directory=Defults.parquets_dir):
