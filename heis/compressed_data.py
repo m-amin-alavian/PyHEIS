@@ -20,17 +20,17 @@ def download(from_year:int, to_year:int|None=None, replace:bool=False, compresse
     from_year, to_year = build_year_interval(from_year=from_year, to_year=to_year)
     pathlib.Path(compressed_files_directory).mkdir(exist_ok =True)
     for year in range(from_year, to_year):
-
+        download(year , replace=replace, compressed_files_directory=compressed_files_directory)
 
 def extract_with_7zip(compressed_file_path, output_directory):
+    if not exe_file_path.exists():
+        raise FileNotFoundError("7-ZIP folder not found")
     if sys.platform == "win32":
         exe_file_path = pathlib.Path(pathlib.PurePath().joinpath("7-ZIP", "windows", "7z.exe"))
         subprocess.run([exe_file_path, "e", compressed_file_path, f"-o{output_directory}", "-y"], shell=True)
     else:
         exe_file_path = pathlib.Path(pathlib.PurePath().joinpath("7-ZIP", "linux", "7zz"))
         subprocess.run([exe_file_path, "e", compressed_file_path, f"-o{output_directory}", "-y"])
-    if not exe_file_path.exists():
-        raise FileNotFoundError("7-ZIP folder not found")
 
 
 def inplace_extract(compressed_file_directory):
