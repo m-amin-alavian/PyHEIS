@@ -2,6 +2,7 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import pyodbc
+import sys
 
 import pathlib
 import os
@@ -17,7 +18,15 @@ class AccessFile:
         self.raw_data_directory = raw_data_directory
 
     def make_connection_string(self, directory):
-        files = [f.lower() for f in os.listdir(directory)]
+        if sys.platform == "win32":
+            join_string = "\\"
+            driver = "Microsoft Access Driver (*.mdb, *.accdb)"
+            files = [f.lower() for f in os.listdir(directory)]
+        else:
+            join_string = "/"
+            files = [f for f in os.listdir(directory)]
+            driver = "MDBTools"
+
         accdb_file = None
         for file in files:
             if (file.find('.mdb')>=0) or (file.find('.accdb')>=0):
@@ -27,8 +36,8 @@ class AccessFile:
             raise FileNotFoundError
 
         conn_str = (
-            r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
-            f"DBQ={directory}\\{accdb_file};"
+            f"DRIVER={{{driver}}};"
+            f"DBQ={directory}{join_string}{accdb_file};"
             )
         return conn_str
 
