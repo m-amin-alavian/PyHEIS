@@ -1,6 +1,6 @@
 # PyHEIS
 
-A package to obtain household data.
+A package to obtain household expenditure and income survey data.
 
 ## Usage
 
@@ -10,7 +10,7 @@ A package to obtain household data.
 git clone https://github.com/m-amin-alavian/PyHEIS household
 ```
 
-:two: Modify the `setttings.yaml` file to your liking.
+:two: Modify the `settings.yaml` file to your liking.
 
 :three: Create a script in the root folder, using the `heis` modules as needed:
 
