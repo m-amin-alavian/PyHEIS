@@ -32,6 +32,11 @@
 #_______________________________________________#
 
 
+######################################################################
+##                     - - -    General   - - -                     ##
+######################################################################
+
+
 household_information:
     file_codes:
         1363: null
@@ -222,6 +227,11 @@ members_properties:
 house_specifications:
     file_codes:
         1363: "P2"
+
+
+######################################################################
+##                   - - -    Expenditure   - - -                   ##
+######################################################################
 
 
 food:
@@ -433,9 +443,10 @@ investment:
         1378: "P3S10"
         1383: "P3S14"
 
-#####################################################
-#                       Income                      #
-#####################################################
+######################################################################
+##                     - - -    Incomes   - - -                     ##
+######################################################################
+
 
 INCOME_BASE_ITEMS:
     income_base_columns: &income_base_columns
@@ -443,6 +454,7 @@ INCOME_BASE_ITEMS:
             new_name: "ID"
             type: "unsigned"
         ADDRESS: *employment_income_Address
+
     income_member_number: &income_member_number
         new_name: "Member_Number"
         type: "unsigned"
@@ -455,15 +467,147 @@ INCOME_BASE_ITEMS:
         new_name: "Activity_Status"
         type: "unsigned"
 
+    income_workplace_activity: &income_workplace_activity
+        new_name: "Workplace_Activity"
+        type: "unsigned"
+
+    income_sector: &income_sector
+        new_name: "Sector"
+        type: "category"
+
+    income_working_hours_per_day: &income_working_hours_per_day
+        new_name: "Working_Hours_per_Day"
+        type: "unsigned"
+
+    income_working_day_per_week: &income_working_day_per_week
+        new_name: "Working_Day_per_Week"
+        type: "unsigned"
+
+    income_monthly_gross: &income_monthly_gross
+        new_name: "Monthly_Gross_Income"
+        type: "float"
+
+    income_yearly_gross: &income_yearly_gross
+        new_name: "Yearly_Gross_Income"
+        type: "float"
+
+    income_monthly_continuous: &income_monthly_continuous
+        new_name: "Monthly_Continuous_Income"
+        type: "float"
+
+    income_yearly_continuous: &income_yearly_continuous
+        new_name: "Yearly_Continuous_Income"
+        type: "float"
+
+    income_monthly_temporary: &income_monthly_temporary
+        new_name: "Monthly_Temporary_Income"
+        type: "float"
+
+    income_yearly_temporary: &income_yearly_temporary
+        new_name: "Yearly_Temporary_Income"
+        type: "float"
+
+    income_monthly_net: &income_monthly_net
+        new_name: "Monthly_Net_Income"
+        type: "float"
+
+    income_yearly_net: &income_yearly_net
+        new_name: "Yearly_Net_Income"
+        type: "float"
+
+
 employment_income:
     file_codes:
         1363: null
         1369: "P4S1"
         1384: "P4S01"
+
     columns:
         <<: *income_base_columns
-        DyCol01:
-            1384: *income_member_number
+        COL01: *income_member_number
+        DyCol01: *income_member_number
+
+        COL02:
+            1369: *income_job_code
+            1374: *income_activity_status
+        DyCol02:
+            1384: *income_activity_status
+
+        COL03:
+            1369: *income_workplace_activity
+            1374: *income_job_code
+        DyCol03:
+            1384: *income_job_code
+
+        COL04:
+            1369: *income_sector
+            1374: *income_workplace_activity
+        DyCol04:
+            1384: *income_workplace_activity
+
+        COL05:
+            1369: null
+            1370: *income_monthly_gross
+            1374: *income_sector
+        DyCol05:
+            1384: *income_sector
+        
+        COL06:
+            1369: *income_yearly_gross
+            1374: *income_monthly_gross
+        DyCol6:
+            1384: *income_working_hours_per_day
+
+        Col07:
+            1369: null
+            1370: *income_monthly_continuous
+            1374: *income_yearly_gross
+        DyCol07:
+            1384: *income_working_day_per_week
+
+        Col08:
+            1369: *income_yearly_continuous
+            1374: *income_monthly_continuous
+        DyCol08:
+            1384: *income_monthly_gross
+
+        Col09:
+            1369: null
+            1370: *income_monthly_temporary
+            1374: *income_yearly_continuous
+        DyCol09:
+            1384: *income_yearly_gross
+
+        Col10:
+            1369: *income_yearly_temporary
+            1374: *income_monthly_temporary
+        DyCol10:
+            1384: *income_monthly_gross
+
+        Col11:
+            1369: null
+            1370: *income_monthly_net
+            1374: *income_yearly_temporary
+        DyCol11:
+            1384: *income_yearly_continuous
+
+        Col12:
+            1369: *income_yearly_net
+            1374: *income_monthly_net
+        DyCol12:
+            1384: *income_monthly_temporary
+
+        Col13:
+            1369: null
+            1374: *income_yearly_net
+        DyCol13:
+            1384: *income_yearly_temporary
+
+        DyCol14:
+            1384: *income_monthly_net
+
+        DyCol15:
+            1384: *income_yearly_net
 
 
 self_employed_income:
@@ -484,13 +628,13 @@ subsidy:
         1390: "P4S04"
 
 
-#
-## Old income tables
-#
+# # # # # # # # # # - - - Old income tables - - - # # # # # # # # # #
 
-public_employment_income:
+
+public_employment_income: &public_employment_income
     file_codes:
         1363: P4S1
+        1369: null
 
     property:
         urban_rural: [1363, 1364, 1365, 1366, 1367, 1368]
@@ -509,9 +653,7 @@ public_employment_income:
                 new_name: "Currently_in_This_Job"
                 type: "boolean"
                 true_condition: 1
-            COL05: 
-                new_name: "Gross_Income"
-                type: "float"
+            COL05: *income_yearly_gross
             COL07: 
                 new_name: "Continuous_Income"
                 type: "float"
@@ -548,3 +690,10 @@ public_employment_income:
                     <<: *income_job_code
                     type: "string"
                 1374: *income_activity_status
+
+
+private_employment_income:
+    <<: *public_employment_income
+    file_codes:
+        1363: P4S2
+        1369: null
