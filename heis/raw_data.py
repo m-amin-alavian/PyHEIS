@@ -81,50 +81,44 @@ def _change_1380_table_names(year, table_name):
     return table_name
 
 
-def extract_tables_as_csv(year:int, raw_data_directory=Defults.raw_dir, csv_directory=Defults.csv_dir):
-    year_directory = csv_directory.joinpath(str(year))
-    pathlib.Path(year_directory).mkdir(parents=True, exist_ok=True)
+def _save_extracted_table(access_file, table_name, storage_technology, csv_directory, sql_directory):
+    try:
+        df = access_file.get_table(table_name)
+    except (pyodbc.ProgrammingError, pyodbc.OperationalError):
+        tqdm.write(f"table {table_name} from {access_file.year} failed to extract")
+        return
+    table_name = _change_1380_table_names(access_file.year, table_name)
+    if storage_technology == "csv":
+        year_directory = csv_directory.joinpath(str(access_file.year))
+        pathlib.Path(year_directory).mkdir(parents=True, exist_ok=True)
+        df.to_csv(year_directory.joinpath(f"{table_name}.csv"), index=False)
+    elif storage_technology == "sql":
+        with sqlite3.connect(sql_directory.joinpath("raw_data.db")) as sql_connection:
+            df.to_sql(table_name, sql_connection, if_exists='replace', index=False)
+
+
+def extract_tables_from_access_file(year:int, raw_data_directory=Defults.raw_dir,
+            storage_technology=Defults.storage, csv_directory=Defults.csv_dir, sql_directory=Defults.local_directory):
     access_file = AccessFile(year, raw_data_directory)
     access_file.create_connection()
     available_tables = access_file.get_tables_list()
-    for table_name in tqdm(available_tables, desc=f"Extracting csv from HEIS{year}", unit="table"):
-        try:
-            df = access_file.get_table(table_name)
-        except (pyodbc.ProgrammingError, pyodbc.OperationalError):
-            tqdm.write(f"table {table_name} from {year} failed to convert")
-            continue
-        table_name = _change_1380_table_names(year, table_name)
-        df.to_csv(year_directory.joinpath(f"{table_name}.csv"), index=False)
+    for table_name in tqdm(available_tables, desc=f"Extracting data from HEIS{year}", unit="table"):
+        _save_extracted_table(access_file=access_file,
+            table_name=table_name,
+            storage_technology=storage_technology,
+            csv_directory=csv_directory,
+            sql_directory=sql_directory)
     access_file.close_connection()
 
 
-def extract_csv_files(from_year=None, to_year=None, raw_data_directory=Defults.raw_dir, csv_directory=Defults.csv_dir):
+def extract_raw_data(from_year=None, to_year=None, raw_data_directory=Defults.raw_dir,
+            storage_technology=Defults.storage, csv_directory=Defults.csv_dir, sql_directory=Defults.local_directory):
+    # TODO change function name!
     from_year, to_year = build_year_interval(from_year=from_year, to_year=to_year)
 
     for year in range(from_year, to_year):
-        extract_tables_as_csv(year, raw_data_directory=raw_data_directory, csv_directory=csv_directory)
-
-
-def extract_raw_data_to_db(from_year=None, to_year=None, raw_data_directory=Defults.raw_dir, directory=Defults.local_directory):
-    from_year, to_year = build_year_interval(from_year=from_year, to_year=to_year)
-    sql_connection = sqlite3.connect(directory.joinpath("raw_data.db"))
-    for year in range(from_year, to_year):
-        access_file = AccessFile(year, raw_data_directory)
-        access_file.create_connection()
-        available_tables = access_file.get_tables_list()
-        for table_name in tqdm(available_tables, desc=f"Extracting tables from HEIS{year}", unit="table"):
-            try:
-                df = access_file.get_table(table_name)
-            except (pyodbc.ProgrammingError, pyodbc.OperationalError):
-                tqdm.write(f"table {table_name} from {year} failed to convert")
-                continue
-            table_name = _change_1380_table_names(year, table_name)
-            for column in df.columns:
-                try:
-                    df.loc[:, column] = pd.to_numeric(df[column], downcast='unsigned')
-                except ValueError:
-                    continue
-            df.to_sql(table_name, sql_connection, if_exists='replace', index=False)
+        extract_tables_from_access_file(year, raw_data_directory=raw_data_directory, storage_technology=storage_technology,
+            csv_directory=csv_directory, sql_directory=sql_directory)
 
 
 def _select_year(dictionary:dict, year:int) -> int|None:
@@ -180,7 +174,7 @@ def _clean_table(df:pd.DataFrame, year:int|None=None):
     df = _fix_bad_ids(df, year)
     return df
 
-def open_table_csv(year:int, table_name:str, urban:bool|None=None):
+def open_table(year:int, table_name:str, urban:bool|None=None, source=Defults.storage):
     table_names = columns_properties[table_name]["file_codes"]
     table_file_code = table_names[_select_year(table_names, year)]
     if urban is None:
@@ -190,7 +184,11 @@ def open_table_csv(year:int, table_name:str, urban:bool|None=None):
     dfc = []
     for t in urban:
         file_name = _build_file_name(year=year, table=table_file_code, urban=t)
-        df = pd.read_csv(f"D:\\PyHEIS_Data\\3_csv_files\\{year}\\{file_name}", low_memory=False)
+        if source == "csv":
+            df = pd.read_csv(f"D:\\PyHEIS_Data\\3_csv_files\\{year}\\{file_name}", low_memory=False)
+        elif source == "sql":
+            # TODO: add sql support
+            pass
         dfc.append(df)
     table = pd.concat(dfc, axis="index", ignore_index=True)
     table = _clean_table(table, year)
@@ -227,17 +225,17 @@ def load_table_from_csv(year:int, table_name:str):
         if year in urban_rural:
             dfs = []
             for urban in [True, False]:
-                df = open_table_csv(year=year, table_name=table_name, urban=urban)
+                df = open_table(year=year, table_name=table_name, urban=urban)
                 df = apply_columns_properties(df, year=year, table_name=table_name, urban=urban)
                 dfs.append(df)
             df = pd.concat(dfs, axis="index", ignore_index=True)
     except KeyError:
-        df = open_table_csv(year=year, table_name=table_name)
+        df = open_table(year=year, table_name=table_name)
         df = apply_columns_properties(df, year=year, table_name=table_name)
     return df
 
 def make_parquet(year:int, table_name:str, parquets_directory=Defults.parquets_dir):
-    table = open_table_csv(year, table_name)
+    table = open_table(year, table_name)
     table = apply_columns_properties(table, year, table_name)
     pathlib.Path(parquets_directory).mkdir(exist_ok=True)
     table.to_parquet(parquets_directory.joinpath(f"{year}_{table_name}.parquet"))

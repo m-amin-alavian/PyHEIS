@@ -4,3 +4,6 @@ online_directory: "https://s3.ir-thr-at1.arvanstorage.com/gsmedb/HEIS"
 
 defult_first_year: 1363
 defult_last_year: 1400
+
+# can be csv or sql
+storage_technology: csv

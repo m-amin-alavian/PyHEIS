@@ -24,3 +24,5 @@ class Defults:
 
     first_year = settings['defult_first_year']
     last_year = settings['defult_last_year']
+
+    storage = settings['storage_technology']

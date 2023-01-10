@@ -1,35 +1,38 @@
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#                                               #
-#       Tables:                                 #
-#           General:                            #
-#               - household_information         #
-#               - members_properties            #
-#               - house_specifications          #
-#                                               #
-#           Expenditures:                       #
-#               - food                          #
-#               - cigaret                       #
-#               - cloth                         #
-#               - home                          #
-#               - cloth                         #
-#               - furniture                     #
-#               - medical                       #
-#               - transportation                #
-#               - communication                 #
-#               - entertainment                 #
-#               - education                     #
-#               - hotel                         #
-#               - other                         #
-#               - durable                       #
-#               - investment                    #
-#                                               #
-#           Incomes:                            #
-#               - employment_income             #
-#               - self_employed_income          #
-#               - other_income                  #
-#               - subsidy                       #
-#                                               #
-#_______________________________________________#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#                                                   #
+#       Tables:                                     #
+#           General:                                #
+#               - household_information             #
+#               - members_properties                #
+#               - house_specifications              #
+#                                                   #
+#           Expenditures:                           #
+#               - food                              #
+#               - cigaret                           #
+#               - cloth                             #
+#               - home                              #
+#               - cloth                             #
+#               - furniture                         #
+#               - medical                           #
+#               - transportation                    #
+#               - communication                     #
+#               - entertainment                     #
+#               - education                         #
+#               - hotel                             #
+#               - other                             #
+#               - durable                           #
+#               - investment                        #
+#                                                   #
+#           Incomes:                                #
+#               - employment_income                 #
+#               - self_employed_income              #
+#               - other_income                      #
+#               - subsidy                           #
+#               old tables:                         #
+#                   - public_employment_income      #
+#                   - private_employment_income     #
+#                                                   #
+#___________________________________________________#
 
 
 ######################################################################
