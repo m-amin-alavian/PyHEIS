@@ -25,3 +25,28 @@ def build_year_interval(from_year, to_year):
         return (from_year, from_year+1)
     else:
         return (from_year, to_year+1)
+
+
+def select_version(dictionary:dict, year:int) -> int|None:
+    pattern_list = list(dictionary.keys())
+    for element in pattern_list:
+        if type(element) is not int:
+            return None
+        elif (element < 1300) or (element > 1500):
+            return None
+
+    selected_pattern = None
+    for pattern in pattern_list:
+        if pattern <= year:
+            if (selected_pattern is None) or (selected_pattern <= pattern):
+                selected_pattern = pattern
+    return selected_pattern
+
+
+def get_version(dictionary:dict, year:int) -> dict:
+    selected_year = select_version(dictionary, year)
+    if selected_year is None:
+        selected_version = dictionary
+    else:
+        selected_version = dictionary[selected_year]
+    return selected_version

@@ -2,6 +2,7 @@ import yaml
 
 import pathlib
 
+
 settings_path = pathlib.PurePath().joinpath("settings.yaml")
 with open(settings_path, mode="r", encoding="utf8") as yaml_file:
     settings = yaml.load(yaml_file, Loader=yaml.CLoader)
@@ -13,6 +14,10 @@ with open(other_metadata_path, mode="r", encoding="utf8") as yaml_file:
 columns_properties_path = pathlib.PurePath().joinpath("metadata", "columns_properties.yaml")
 with open(columns_properties_path, mode="r", encoding="utf8") as yaml_file:
     columns_properties = yaml.load(yaml_file, Loader=yaml.CLoader)
+
+house_hold_id_path = pathlib.PurePath().joinpath("metadata", "house_hold_id.yaml")
+with open(house_hold_id_path, mode="r", encoding="utf8") as yaml_file:
+    house_hold_id = yaml.load(yaml_file, Loader=yaml.CLoader)
 
 class Defults:
     local_directory = pathlib.PurePath(settings['local_directory'])

@@ -9,7 +9,7 @@ import logging
 import os
 import sqlite3
 
-from .utils import build_year_interval
+from .utils import build_year_interval, select_version, get_version
 from .general import Defults, other_metadata, columns_properties
 
 logging.basicConfig(filename="raw_data.log", level=logging.DEBUG)
@@ -121,17 +121,6 @@ def extract_raw_data(from_year=None, to_year=None, raw_data_directory=Defults.ra
             csv_directory=csv_directory, sql_directory=sql_directory)
 
 
-def _select_year(dictionary:dict, year:int) -> int|None:
-    pattern_list = list(dictionary.keys())
-    if len(pattern_list) == sum([True for element in pattern_list if type(element) is str]):
-        return None
-    selected_pattern = None
-    for pattern in pattern_list:
-        if pattern <= year:
-            if (selected_pattern is None) or (selected_pattern <= pattern):
-                selected_pattern = pattern
-    return selected_pattern
-
 def _get_column_property(year, table_name, column, urban=None):
     if urban is None:
         try:
@@ -143,12 +132,9 @@ def _get_column_property(year, table_name, column, urban=None):
     elif urban is False:
         property_collection = columns_properties[table_name]["columns"]["rural"][column]
     logging.debug("{}: {}".format(column, property_collection))
-    selected_year = _select_year(property_collection, year)
-    if selected_year is None:
-        selected_property = property_collection
-    else:
-        selected_property = property_collection[selected_year]
+    selected_property = get_version(property_collection, year)
     return selected_property
+
 
 def _build_file_name(year:int, table:str, urban:bool):
     year_part = year % 100 if year < 1400 else year
@@ -156,10 +142,12 @@ def _build_file_name(year:int, table:str, urban:bool):
     file_name = f"{rural_urban}{year_part}{table}.csv"
     return file_name
 
+
 def _fix_bad_ids(df, year:int|None=None):
-    if year == 1374:
-        filt = df.iloc[:, 0].str.isnumeric()
-        df = df.loc[filt]
+    if df.iloc[:, 0].dtype is str:
+        if year == 1374:
+            filt = df.iloc[:, 0].str.isnumeric()
+            df = df.loc[filt]
     return df
 
 
@@ -174,25 +162,21 @@ def _clean_table(df:pd.DataFrame, year:int|None=None):
     df = _fix_bad_ids(df, year)
     return df
 
-def open_table(year:int, table_name:str, urban:bool|None=None, source=Defults.storage):
+
+def open_table(year:int, table_name:str, urban:bool, source=Defults.storage):
     table_names = columns_properties[table_name]["file_codes"]
-    table_file_code = table_names[_select_year(table_names, year)]
-    if urban is None:
-        urban = [True, False]
-    else:
-        urban = [urban]
-    dfc = []
-    for t in urban:
-        file_name = _build_file_name(year=year, table=table_file_code, urban=t)
-        if source == "csv":
-            df = pd.read_csv(f"D:\\PyHEIS_Data\\3_csv_files\\{year}\\{file_name}", low_memory=False)
-        elif source == "sql":
-            # TODO: add sql support
-            pass
-        dfc.append(df)
-    table = pd.concat(dfc, axis="index", ignore_index=True)
+    table_file_code = table_names[select_version(table_names, year)]
+
+    file_name = _build_file_name(year=year, table=table_file_code, urban=urban)
+    if source == "csv":
+        table = pd.read_csv(f"D:\\PyHEIS_Data\\3_csv_files\\{year}\\{file_name}", low_memory=False)
+    elif source == "sql":
+        # TODO: add sql support
+        return
+
     table = _clean_table(table, year)
     return table
+
 
 def apply_columns_properties(table, year, table_name, urban=None):
     for column in table.columns:
@@ -219,20 +203,24 @@ def apply_columns_properties(table, year, table_name, urban=None):
             table = table.rename(columns={column: column_props["new_name"]})
     return table
 
-def load_table_from_csv(year:int, table_name:str):
+
+def load_table(year:int, table_name:str):
     try:
         urban_rural = columns_properties[table_name]["property"]["urban_rural"]
-        if year in urban_rural:
-            dfs = []
-            for urban in [True, False]:
-                df = open_table(year=year, table_name=table_name, urban=urban)
-                df = apply_columns_properties(df, year=year, table_name=table_name, urban=urban)
-                dfs.append(df)
-            df = pd.concat(dfs, axis="index", ignore_index=True)
     except KeyError:
-        df = open_table(year=year, table_name=table_name)
-        df = apply_columns_properties(df, year=year, table_name=table_name)
+        urban_rural = []
+
+    dfs = []
+    for urban in [True, False]:
+        df = open_table(year=year, table_name=table_name, urban=urban)
+        if year in urban_rural:
+            df = apply_columns_properties(df, year=year, table_name=table_name, urban=urban)
+        else:
+            df = apply_columns_properties(df, year=year, table_name=table_name, urban=None)
+        dfs.append(df)
+    df = pd.concat(dfs, axis="index", ignore_index=True)
     return df
+
 
 def make_parquet(year:int, table_name:str, parquets_directory=Defults.parquets_dir):
     table = open_table(year, table_name)

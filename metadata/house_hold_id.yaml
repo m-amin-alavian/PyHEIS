@@ -1,0 +1,63 @@
+
+ID_Length:
+  1363: 7
+  1374: 8
+  1375: 7
+  1377: 9
+  1387: 10
+  1392: 11
+
+
+Urban-Rural:
+  position:
+    start: 0
+    end: 1
+
+  names:
+    1363:
+      0: 'rural'
+      1: 'urban'
+    1387:
+      1: 'urban'
+      2: 'rural'
+
+
+Province:
+  position:
+    start: 1
+    end: 3
+
+  names:
+    0: 'Markazi'                          # مرکزی
+    1: 'Gilan'                            # گیلان
+    2: 'Mazandaran'	                      # مازندران
+    3: 'East_Azarbaijan'	                # آذربایجان شرقی
+    4: 'West_Azarbaijan'	                # آذربایجان غربی
+    5: 'Kermanshah'	                      # کرمانشاه
+    6: 'Khuzestan'	                      # خوزستان
+    7: 'Fars'	                            # فارس
+    8: 'Kerman'	                          # کرمان
+    9: 'Razavi_Khorasan'	                # خراسان رضوی
+    10: 'Esfahan'	                        # اصفهان
+    11: 'Sistan_and_Baluchestan'	        # سیستان و بلوچستان
+    12: 'Kordestan'	                      # کردستان
+    13: 'Hamadan'	                        # همدان
+    14: 'Chahar_Mahall_and_Bakhtiari'     # چهارمحال و بختیاری
+    15: 'Lorestan'	                      # لرستان
+    16: 'Ilam'	                          # ایلام
+    17: 'Kohgiluyeh_and_Buyer_Ahmad'      # کهکیلویه و بویر احمد
+    18: 'Bushehr'	                        # بوشهر
+    19: 'Zanjan'	                        # زنجان
+    20: 'Semnan'	                        # سمنان
+    21: 'Yazd'	                          # یزد
+    22: 'Hormozgan'	                      # هرمزگان
+    23: 'Tehran'	                        # تهران
+    24: 'Ardebil'	                        # اردبیل
+    25: 'Qom'	                            # قم
+    26: 'Qazvin'	                        # قزوین
+    27: 'Golestan'	                      # گلستان
+    28: 'North_Khorasan'	                # خراسان شمالی
+    29: 'South_Khorasan'	                # خراسان جنوبی
+    30: 'Alborz'	                        # البرز
+
+
