@@ -61,3 +61,13 @@ Province:
     30: 'Alborz'	                        # البرز
 
 
+Region:
+  position:
+    1363: null
+    1377:
+      start: 1
+      end: 5
+    1387: null
+    1392:
+      start: 1
+      end: 5

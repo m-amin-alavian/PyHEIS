@@ -227,6 +227,7 @@ members_properties:
             1363: *property_COL13_1366
             1366: null
 
+
 house_specifications:
     file_codes:
         1363: "P2"
@@ -237,133 +238,170 @@ house_specifications:
 ######################################################################
 
 
+EXPENDITURE_BASE_ITEMS:
+
+
+    # # # Provision Method
+
+    expenditure_provision_method_dase: &expenditure_provision_method_dase
+        new_name: "Provision_Method"
+        type: "category"
+    
+    expenditure_provision_method_1: &expenditure_provision_method_1
+        <<: *expenditure_provision_method_dase
+        categories: 
+            1: "Purchase_Subsidised_Price"
+            2: "Purchase_Free_Price"
+            3: "Home_Production"
+            4: "Instead_of_Public_Service"
+            5: "Instead_of_Private_Service"
+            6: "Agricultural_Work"
+            7: "Non_Agricultural_Work"
+            8: "Donation"
+
+    expenditure_provision_method_2: &expenditure_provision_method_2
+        <<: *expenditure_provision_method_dase
+        categories: 
+                2: "Purchase"
+                3: "Home_Production"
+                4: "Instead_of_Public_Service"
+                5: "Instead_of_Private_Service"
+                6: "Agricultural_Work"
+                7: "Non_Agricultural_Work"
+                8: "Donation"
+
+    expenditure_provision_method_3: &expenditure_provision_method_3
+        <<: *expenditure_provision_method_dase
+            1: "Purchase"
+            2: "Home_Production"
+            3: "Instead_of_Public_Service"
+            4: "Instead_of_Private_Service"
+            5: "Agricultural_Work"
+            6: "Non_Agricultural_Work"
+            7: "Donation"
+
+    expenditure_provision_method_4: &expenditure_provision_method_4
+        <<: *expenditure_provision_method_dase
+            1: "Purchase"
+            2: "Home_Production"
+            3: "Instead_of_Public_Service"
+            4: "Instead_of_Private_Service"
+            5: "Agricultural_Work"
+            6: "Non_Agricultural_Work"
+            7: "Donation"
+            8: "Instead_of_Cooperative_Service"
+
+    expenditure_provision_method_5: &expenditure_provision_method_5
+        <<: *expenditure_provision_method_dase
+            1: "Purchase"
+            2: "Home_Production"
+            3: "Instead_of_Public_Service"
+            4: "Instead_of_Cooperative_Service"
+            5: "Instead_of_Private_Service"
+            6: "Agricultural_Work"
+            7: "Non_Agricultural_Work"
+            8: "Donation"
+
+    expenditure_provision_method: &expenditure_provision_method
+            1363: *expenditure_provision_method_1
+            1369: *expenditure_provision_method_2
+            1374: *expenditure_provision_method_3
+            1379: *expenditure_provision_method_4
+            1383: *expenditure_provision_method_5
+
+
+    # # # Price System
+
+    expenditure_price_system: &expenditure_price_system
+        new_name: "Price_System"
+        type: "category"
+        categories: 
+            0: "Free_Price"
+            1: "Subsidised_Price"
+
+
+    # # # Grams
+
+    expenditure_grams: &expenditure_grams
+        new_name: "Grams"
+        type: "float"
+
+
+    # # # Kilos
+
+    expenditure_kilos: &expenditure_kilos
+        new_name: "Kilos"
+        type: "float"
+
+
+    # # # Price
+
+    expenditure_price: &expenditure_price
+        new_name: "Price"
+        type: "float"
+
+
+    # # # Expenditure Amount
+
+    expenditure_amount: &expenditure_amount
+        new_name: "Expenditure"
+        type: "float"
+
+
+    # # # Base Items
+
+    expenditure_base_columns: &expenditure_base_columns
+        Address: &expenditure_income_Address
+            new_name: "ID"
+            type: "unsigned"
+        ADDRESS: *expenditure_income_Address
+
+        COL1: &expenditure_code
+            new_name: "Code"
+            type: "unsigned"
+        DYCOL01: *expenditure_code
+
+
 food:
     file_codes:
         1363: "P3S01"
     
     columns:
-        Address: &food_Address
-            1363:
-                new_name: "ID"
-                type: "unsigned"
-        ADDRESS: *food_Address
+        <<: *expenditure_base_columns
 
-        DYCOL01: &food_DYCOL01
-            1363:
-                new_name: "Code"
-                type: "unsigned"
-        COL1: *food_DYCOL01
+        COL3: *expenditure_provision_method
+        DYCOL02: *expenditure_provision_method
 
-        DYCOL02: &food_DYCOL02
-            1363:
-                new_name: "Provision_Method"
-                type: "category"
-                categories: 
-                    1: "Purchase_Subsidised_Price"
-                    2: "Purchase_Free_Price"
-                    3: "Home_Production"
-                    4: "Instead_of_Public_Service"
-                    5: "Instead_of_Private_Service"
-                    6: "Agricultural_Work"
-                    7: "Non_Agricultural_Work"
-                    8: "Donation"
-            1369:
-                new_name: "Provision_Method"
-                type: "category"
-                categories: 
-                    2: "Purchase"
-                    3: "Home_Production"
-                    4: "Instead_of_Public_Service"
-                    5: "Instead_of_Private_Service"
-                    6: "Agricultural_Work"
-                    7: "Non_Agricultural_Work"
-                    8: "Donation"
-            1374:
-                new_name: "Provision_Method"
-                type: "category"
-                categories: 
-                    1: "Purchase"
-                    2: "Home_Production"
-                    3: "Instead_of_Public_Service"
-                    4: "Instead_of_Private_Service"
-                    5: "Agricultural_Work"
-                    6: "Non_Agricultural_Work"
-                    7: "Donation"
-            1379:
-                new_name: "Provision_Method"
-                type: "category"
-                categories: 
-                    1: "Purchase"
-                    2: "Home_Production"
-                    3: "Instead_of_Public_Service"
-                    4: "Instead_of_Private_Service"
-                    5: "Agricultural_Work"
-                    6: "Non_Agricultural_Work"
-                    7: "Donation"
-                    8: "Instead_of_Cooperative_Service"
-            1383:
-                new_name: "Provision_Method"
-                type: "category"
-                categories: 
-                    1: "Purchase"
-                    2: "Home_Production"
-                    3: "Instead_of_Public_Service"
-                    4: "Instead_of_Cooperative_Service"
-                    5: "Instead_of_Private_Service"
-                    6: "Agricultural_Work"
-                    7: "Non_Agricultural_Work"
-                    8: "Donation"
-        COL3: *food_DYCOL02
-
-        DYCOL03: &food_DYCOL03
+        COL4:
             1363: null
-            1369:
-                new_name: "Price_System"
-                type: "category"
-                categories: 
-                    0: "Free_Price"
-                    1: "Subsidised_Price"
+            1369: *expenditure_price_system
             1374: null
-            1383:
-                new_name: "Grams"
-                type: "float"
-        COL4: *food_DYCOL03
+            1383: *expenditure_grams
+        DYCOL03: *expenditure_grams
 
-        DYCOL04: &food_DYCOL04
-            1363:
-                new_name: "Kilos"
-                type: "float"
-        COL5: *food_DYCOL04
-        COL4_5: *food_DYCOL04
-        COL5_6: *food_DYCOL04
+        COL4_5: *expenditure_kilos
+        COL5_6: *expenditure_kilos
+        COL5: *expenditure_kilos
+        DYCOL04: *expenditure_kilos
 
-        DYCOL05:
-            1384: &food_DYCOL05_1384
-                new_name: "Price"
-                type: "float"
-
-        DYCOL06:
-            1384: &food_DYCOL06_1384
-                new_name: "Expenditure"
-                type: "float"
         COL6:
-            1363: *food_DYCOL06_1384
+            1363: *expenditure_amount
             1369: null
-            1374: *food_DYCOL05_1384
+            1374: *expenditure_price
         COL7:
             1363: null
-            1369: *food_DYCOL05_1384
+            1369: *expenditure_price
             1370: null
-            1372: *food_DYCOL05_1384
-            1374: *food_DYCOL06_1384
+            1372: *expenditure_price
+            1374: *expenditure_amount
         COL8:
             1363: null
-            1369: *food_DYCOL06_1384
+            1369: *expenditure_amount
             1374: null
-        
-        DYCOL07:
-            1384:
-                "drop"
+
+        DYCOL05: *expenditure_price
+        DYCOL06: *expenditure_amount
+        DYCOL07: "drop"
 
 
 cigaret:
@@ -371,11 +409,17 @@ cigaret:
         1363: null
         1383: "P3S02"
 
+    columns:
+        <<: *expenditure_base_columns
+
 
 cloth:
     file_codes:
         1363: "P3S02"
         1383: "P3S03"
+
+    columns:
+        <<: *expenditure_base_columns
 
 
 home:
@@ -383,11 +427,16 @@ home:
         1363: "P3S03"
         1383: "P3S04"
 
+    columns:
+        <<: *expenditure_base_columns
 
 furniture:
     file_codes:
         1363: "P3S04"
         1383: "P3S05"
+
+    columns:
+        <<: *expenditure_base_columns
 
 
 medical:
@@ -395,11 +444,17 @@ medical:
         1363: "P3S05"
         1383: "P3S06"
 
+    columns:
+        <<: *expenditure_base_columns
+
 
 transportation:
     file_codes:
         1363: "P3S06"
         1383: "P3S07"
+
+    columns:
+        <<: *expenditure_base_columns
 
 
 communication:
@@ -407,11 +462,17 @@ communication:
         1363: null
         1383: "P3S08"
 
+    columns:
+        <<: *expenditure_base_columns
+
 
 entertainment:
     file_codes:
         1363: "P3S07"
         1383: "P3S09"
+
+    columns:
+        <<: *expenditure_base_columns
 
 
 education:
@@ -419,11 +480,17 @@ education:
         1363: null
         1383: "P3S10"
 
+    columns:
+        <<: *expenditure_base_columns
+
 
 hotel:
     file_codes:
         1363: null
         1383: "P3S11"
+
+    columns:
+        <<: *expenditure_base_columns
 
 
 other:
@@ -431,11 +498,17 @@ other:
         1363: "P3S08"
         1383: "P3S12"
 
+    columns:
+        <<: *expenditure_base_columns
+
 
 durable:
     file_codes:
         1363: "P3S09"
         1383: "P3S13"
+
+    columns:
+        <<: *expenditure_base_columns
 
 
 investment:
@@ -445,6 +518,10 @@ investment:
         1375: null
         1378: "P3S10"
         1383: "P3S14"
+
+    columns:
+        <<: *expenditure_base_columns
+
 
 ######################################################################
 ##                     - - -    Incomes   - - -                     ##
