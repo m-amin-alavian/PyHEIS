@@ -124,15 +124,23 @@ def extract_raw_data(from_year=None, to_year=None, raw_data_directory=Defults.ra
 def _get_column_property(year, table_name, column, urban=None):
     if urban is None:
         try:
-            property_collection = columns_properties[table_name]["columns"]["both"][column]
+            all_columns = columns_properties[table_name]["columns"]["both"]
         except KeyError:
-            property_collection = columns_properties[table_name]["columns"][column]
+            all_columns = columns_properties[table_name]["columns"]
     elif urban is True:
-        property_collection = columns_properties[table_name]["columns"]["urban"][column]
+        all_columns = columns_properties[table_name]["columns"]["urban"]
     elif urban is False:
-        property_collection = columns_properties[table_name]["columns"]["rural"][column]
-    logging.debug("{}: {}".format(column, property_collection))
-    selected_property = get_version(property_collection, year)
+        all_columns = columns_properties[table_name]["columns"]["rural"]
+    try:
+        column_property = all_columns[column]
+    except KeyError:
+        try:
+            missing_treatment = columns_properties[table_name]['property']['missings']
+        except KeyError:
+            missing_treatment = "pass"
+        return missing_treatment
+    logging.debug("{}: {}".format(column, column_property))
+    selected_property = get_version(column_property, year)
     return selected_property
 
 
@@ -182,6 +190,10 @@ def apply_columns_properties(table, year, table_name, urban=None):
     for column in table.columns:
         logging.debug("year: {} column: {}   ".format(year, column))
         column_props = _get_column_property(year, table_name, column, urban)
+        if column_props == "pass":
+            continue
+        elif column_props == "drop":
+            table = table.drop(colums=column)
 
         if "drop" in column_props:
             table = table.drop(columns=column)
