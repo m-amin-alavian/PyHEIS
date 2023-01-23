@@ -7,3 +7,5 @@ defult_last_year: 1400
 
 # can be csv or sql
 storage_technology: csv
+
+defult_map: humandata
