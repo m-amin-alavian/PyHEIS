@@ -43,7 +43,7 @@ def numerical_columns(df, column_name, column_property):
     return df
 
 
-def make_table_standard(df, year, table_name):
+def make_table_standard(df, table_name, year):
     properties = Metadata.standard_tables[table_name]
     for column_name in properties['columns'].keys():
         column_property = utils.get_version(properties['columns'][column_name], year)
@@ -55,18 +55,30 @@ def make_table_standard(df, year, table_name):
                 categoricla_columns(df, column_name, column_property)
             elif column_property['type'] == 'numerical':
                 numerical_columns(df, column_name, column_property)
-
-    old_columns = df.columns
-    new_columns = [column for column in properties['order'] if column in old_columns]
-    df = df[new_columns]
     return df
 
+def get_column_order(df, table_name):
+    properties = Metadata.standard_tables[table_name]
+    old_order = df.columns
+    new_order = [column for column in properties['order'] if column in old_order]
+    return new_order
 
-def load_table(year, table_name, standardize=False, parquets_directory=Defults.parquets_dir):
-    table = pd.read_parquet(parquets_directory.joinpath(f"{year}_{table_name}.parquet"))
-    if standardize == True:
-        table = make_table_standard(df=table, year=year, table_name=table_name)
-    return table
+
+def load_table(table_name, from_year=None, to_year=None, standardize=False, parquets_directory=Defults.parquets_dir):
+    start, end = utils.build_year_interval(from_year=from_year, to_year=to_year)
+    table_collection = []
+    for year in range(start, end):
+        table = pd.read_parquet(parquets_directory.joinpath(f"{year}_{table_name}.parquet"))
+        if standardize:
+            table = make_table_standard(df=table, table_name=table_name, year=year)
+        if (end - start) > 1:
+            table["Year"] = year
+        table_collection.append(table)
+    output_table = pd.concat(table_collection, ignore_index=True)
+    if standardize:
+        columns = get_column_order(output_table, table_name=table_name)
+        output_table = output_table[columns]
+    return output_table
 
 
 def _get_part_position(part_name:str, year:int):
