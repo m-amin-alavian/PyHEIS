@@ -2,7 +2,7 @@ import tqdm
 
 import requests
 
-from .general import Defults
+from .metadata import Defults
 
 
 def download_file(url, path, show_progress_bar=False):
@@ -27,7 +27,9 @@ def build_year_interval(from_year, to_year):
         return (from_year, to_year+1)
 
 
-def select_version(dictionary:dict, year:int) -> int|None:
+def select_version(dictionary, year:int) -> int|None:
+    if type(dictionary) is not dict:
+        return None
     pattern_list = list(dictionary.keys())
     for element in pattern_list:
         if type(element) is not int:
@@ -43,7 +45,7 @@ def select_version(dictionary:dict, year:int) -> int|None:
     return selected_pattern
 
 
-def get_version(dictionary:dict, year:int) -> dict:
+def get_version(dictionary, year:int) -> dict:
     selected_year = select_version(dictionary, year)
     if selected_year is None:
         selected_version = dictionary

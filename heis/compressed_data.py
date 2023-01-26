@@ -4,13 +4,13 @@ import subprocess
 import sys
 import pathlib
 
-from .general import Defults
+from .metadata import Defults
 from .utils import build_year_interval, download_file
 
 
 def download_a_file(year:int, replace:bool=True, compressed_files_directory=Defults.compressed_dir):
     file_name = f"HEIS{year}.rar"
-    file_url = f"{Defults.online_directory}/{file_name}"
+    file_url = f"{Defults.online_dir}/{file_name}"
     local_path = compressed_files_directory.joinpath(file_name)
     if (not pathlib.Path(local_path).exists()) or replace:
         download_file(file_url, local_path, show_progress_bar=True)
