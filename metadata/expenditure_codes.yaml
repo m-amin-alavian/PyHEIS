@@ -87,6 +87,8 @@ flour_and_noodle:                                         # آرد و رشته
         - [11100, 11199]
 
 cereals:                                                  # غلات
+  table: food
+  code_history:
     1363:
       code:
         - [11200, 11299]

@@ -24,8 +24,11 @@ class Metadata:
 
 
 class Defults:
-    settings = open_yaml(["settings.yaml"])
-    
+    try:
+        settings = open_yaml(["settings.yaml"])
+    except FileNotFoundError:
+        settings = open_yaml(["settings-sample.yaml"])
+        
     local_dir = pathlib.PurePath(settings['local_directory'])
     online_dir = settings['online_directory']
     compressed_dir = local_dir.joinpath(settings['compressed_folder_name'])

@@ -3,3 +3,8 @@
 *draft*
 *.ipynb_checkpoints*
 *.log
+
+Data
+Data/*
+
+settings.yaml

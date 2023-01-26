@@ -1,6 +1,6 @@
 
 # Main Directories
-local_directory: "D:\\PyHEIS_Data"
+local_directory: "Data"
 online_directory: "https://s3.ir-thr-at1.arvanstorage.com/gsmedb/HEIS"
 
 # Years
