@@ -1,6 +1,8 @@
 
 *__pycache__*
 *draft*
+.venv
+venv
 *.ipynb_checkpoints*
 *.log
 
