@@ -18,7 +18,7 @@ class Metadata:
     columns_properties = open_yaml(["metadata", "columns_properties.yaml"])
     maps = open_yaml(["metadata", "maps.yaml"])
     house_hold_id = open_yaml(["metadata", "house_hold_id.yaml"])
-    expenditure_codes = open_yaml(["metadata", "expenditure_codes.yaml"])
+    commodity_codes = open_yaml(["metadata", "commodity_codes.yaml"])
     standard_tables = open_yaml(["metadata", "standard_tables.yaml"])
     other = open_yaml(["metadata", "other.yaml"])
 

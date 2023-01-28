@@ -189,11 +189,81 @@ sea_food:                                                 # گوشت حیوان�
         - [11320, 11329]
 
 
-cigaret:
-  level: 0
+dairy_products_and_egg:
   table: food
+  level: 1
   code_history:
     1363:
+      duration: 2
+      code: [13000, 13999]
+    1369:
+      duration: 30
+      code: [13000, 13999]
+    1383:
+      code: [11400, 11499]
+
+milk:
+  table: food
+  level: 2
+  code_history:
+    1363:
+      duration: 2
+      code: [13100, 13199]
+    1369:
+      duration: 30
+      code: [13100, 13199]
+    1383:
+      code: [11410, 11419]
+
+milk_products:
+  table: food
+  level: 2
+  code_history:
+    1363:
+      duration: 2
+      code:
+        - [13200, 13299]
+        - [13300, 13399]
+    1369:
+      duration: 30
+      code:
+        - [13200, 13299]
+        - [13300, 13399]
+    1383:
+      code:
+        - [11420, 11429]
+        - [11430, 11439]
+        - [11520, 11529]      # butter
+
+milk_products_excluding_butter:
+  table: food
+  level: 2
+  code_history:
+    1363: null
+    1383:
+      code:
+        - [11420, 11429]
+        - [11430, 11439]
+
+egg:
+  table: food
+  level: 2
+  code_history:
+    1363:
+      duration: 2
+      code: [13400, 13499]
+    1369:
+      duration: 30
+      code: [13400, 13499]
+    1383:
+      code: [11440, 11449]
+
+
+cigaret:
+  level: 0
+  code_history:
+    1363:
+      table: food
+      duration: 2
       code:
         - [19700, 19799]
-      duration: 2

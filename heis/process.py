@@ -64,14 +64,20 @@ def get_column_order(df, table_name):
     return new_order
 
 
-def load_table(table_name, from_year=None, to_year=None, standardize=False, parquets_directory=Defults.parquets_dir):
+def load_table(table_name, from_year=None, to_year=None, standardize=False, note_year=None, parquets_directory=Defults.parquets_dir):
     start, end = utils.build_year_interval(from_year=from_year, to_year=to_year)
+    if note_year is None:
+        if (end - start) > 1:
+            note_year = True
+        else:
+            False
+            
     table_collection = []
     for year in range(start, end):
         table = pd.read_parquet(parquets_directory.joinpath(f"{year}_{table_name}.parquet"))
         if standardize:
             table = make_table_standard(df=table, table_name=table_name, year=year)
-        if (end - start) > 1:
+        if note_year:
             table["Year"] = year
         table_collection.append(table)
     output_table = pd.concat(table_collection, ignore_index=True)
@@ -101,3 +107,54 @@ def get_part_names(id_column:pd.Series, part_name:str, year:int):
     part_codes = part_codes.astype("category")
     part_names = part_codes.cat.rename_categories(names_mapping)
     return part_names
+
+
+def _get_commodity_properties(commodity_name:str, year:int):
+
+    def _read_property(property):
+        if 'table' in property:
+            table_name = property['table']
+        else:
+            table_name = commodity_property['table']
+        if 'duration' in property:
+            duration = property['duration']
+        else:
+            duration = 30
+        if type(property['code']) is int:
+            code_intervals = [[property['code'], property['code']+1]]
+        elif type(property['code'][0]) is int:
+            code_intervals = [property['code']]
+        else:
+            code_intervals = property['code']
+        return table_name, code_intervals, duration
+
+    commodity_property = Metadata.commodity_codes[commodity_name]
+    code_history = utils.get_version(commodity_property['code_history'], year)
+    property_list = []
+    if 1 in code_history:
+        for code_property in code_history.values():
+            property_list.append(_read_property(code_property))
+    else:
+        property_list.append(_read_property(code_history))
+    return property_list
+
+
+def _build_filter_from_intervals(df, code_intervals):
+    filt = pd.Series(False, index=df.index, dtype=bool)
+    for start, end in code_intervals:
+        filt = filt | ((start < df["Code"]) & (df["Code"] < end))
+    return filt
+
+
+def get_commodity_data(commodity_name:str, year:int, note_duration=False):
+    property_list = _get_commodity_properties(commodity_name=commodity_name, year=year)
+    table_collection = []
+    for table_name, code_intervals, duration in property_list:
+        table = load_table(table_name=table_name, from_year=year, standardize=True)
+        filt = _build_filter_from_intervals(df=table, code_intervals=code_intervals)
+        table = table.loc[filt]
+        if note_duration:
+            table["Duration"] = duration
+        table_collection.append(table)
+    output_table = pd.concat(table_collection).sort_index()
+    return output_table
