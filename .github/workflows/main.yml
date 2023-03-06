@@ -1,7 +1,21 @@
-- name: Sphinx to GitHub Pages
-  # You may pin to the exact commit or the version.
-  # uses: sphinx-notes/pages@7e6a0b84a44f2f35a6c59a1340335015fb9a5add
-  uses: sphinx-notes/pages@3.0beta
-  with:
-    # Path to Sphinx source files
-    documentation_path: ./docs/source
+name: Deploy Sphinx documentation to Pages
+
+# Runs on pushes targeting the default branch
+on:
+  push:
+    branches: [main]
+
+jobs:
+  pages:
+    runs-on: ubuntu-20.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+    - id: deployment
+      uses: sphinx-notes/pages@v3
+      with:
+        documentation_path: ./docs/source
