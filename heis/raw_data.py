@@ -239,6 +239,16 @@ def load_table(year:int, table_name:str):
 
 
 def make_parquet(years:int|list|None=None, table_names:str|list|None=None, parquets_directory=Defults.parquets_dir):
+    """Make parquet data
+       :param year: year to make data for
+       :type year: int
+       :param table_name: name of table to use
+       :type table_name: str
+       :param parquets_directory: directory for the file
+       :type parquets_directory: str
+       :return: A parquet table
+       :rtype: parquet table
+    """
     if years is None:
         years = list(range(Defults.first_year, Defults.last_year+1))
     elif type(years) is int:
