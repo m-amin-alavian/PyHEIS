@@ -17,6 +17,8 @@ def download_file(url:str, path:str|pathlib.Path|None=None, show_progress_bar:bo
         temp_folder.mkdir(exist_ok=True)
         file_name = url.split("/")[-1]
         path = temp_folder.joinpath(file_name)
+    else:
+        file_name = path.name
 
     response = requests.get(url, stream=True)
     file_size = int(response.headers.get('content-length'))
