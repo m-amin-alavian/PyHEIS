@@ -1,14 +1,24 @@
 from tqdm import tqdm
-
 import requests
+
+import pathlib
 
 from .metadata import Defults
 
 
-def download_file(url, path, show_progress_bar=False):
+def download_file(url:str, path:str|pathlib.Path|None=None, show_progress_bar:bool=False):
+    if type(path) is str:
+        path = pathlib.Path(path)
+        file_name = path.name
+    elif path is None:
+        temp_folder = pathlib.Path(__file__).absolute().parents[1].joinpath("temp")
+        temp_folder.mkdir(exist_ok=True)
+        file_name = url.split("/")[-1]
+        path = temp_folder.joinpath(file_name)
+
     response = requests.get(url, stream=True)
     file_size = int(response.headers.get('content-length'))
-    download_bar = tqdm(desc=f"downloading {path.name}", total=file_size, unit="B", unit_scale=True, disable=not show_progress_bar)
+    download_bar = tqdm(desc=f"downloading {file_name}", total=file_size, unit="B", unit_scale=True, disable=not show_progress_bar)
     with open(path, mode="wb") as f:
         for chunk in response.iter_content(chunk_size=4096):
             download_bar.update(len(chunk))
