@@ -9,9 +9,9 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-project = 'Household Budget'
-copyright = '2023, Syd. Amin Alavian'
-author = 'Syd. Amin Alavian'
+project = 'Iran Household Budget Survey'
+copyright = '2023, Alavian & Mohammadi'
+author = 'Alavian & Mohammadi'
 release = '0.1'
 
 # -- General configuration ---------------------------------------------------
