@@ -8,6 +8,7 @@ venv
 *.log
 
 Data/*
+7-Zip/*
 temp/*
 
 settings.yaml

@@ -2,6 +2,8 @@ from tqdm import tqdm
 import requests
 
 import pathlib
+import platform
+from zipfile import ZipFile
 
 from .metadata import Defults
 
@@ -24,6 +26,16 @@ def download_file(url:str, path:str|pathlib.Path|None=None, show_progress_bar:bo
             download_bar.update(len(chunk))
             f.write(chunk)
     download_bar.close()
+
+
+def download_7zip():
+    print(f"Downloading 7-Zip for {platform.system()} with {platform.architecture()[0]} architecture")
+    file_name = f"{platform.system()}-{platform.architecture()[0]}.zip"
+    file_path = pathlib.Path().joinpath("temp", file_name)
+    download_file(f"https://s3.ir-tbz-sh1.arvanstorage.ir/sdac/ihbs/7-Zip/{file_name}", show_progress_bar=True)
+    with ZipFile(file_path) as zip_file:
+        zip_file.extractall(pathlib.Path())
+    file_path.unlink()
 
 
 def build_year_interval(from_year, to_year):
