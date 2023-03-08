@@ -1,16 +1,13 @@
 import yaml
-import os
 import pathlib
 
 
 def open_yaml(path):
-    parent_dir = os.path.join(os.path.dirname(__file__), "..")
     if type(path) is list:
-        pure_path = pathlib.PurePath()
+        relative_path = pathlib.Path("__file__").parent
         for element in path:
-            pure_path = pure_path.joinpath(element)
-        path = pure_path
-    path = os.path.join(parent_dir, path)
+            relative_path = relative_path.joinpath(element)
+        path = relative_path
     with open(path, mode="r", encoding="utf8") as yaml_file:
         yaml_content = yaml.load(yaml_file, Loader=yaml.CLoader)
     return yaml_content
