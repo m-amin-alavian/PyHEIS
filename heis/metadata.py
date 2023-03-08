@@ -4,7 +4,7 @@ import pathlib
 
 def open_yaml(path):
     if type(path) is list:
-        relative_path = pathlib.Path("__file__").parent
+        relative_path = pathlib.Path(__file__).parents[1]
         for element in path:
             relative_path = relative_path.joinpath(element)
         path = relative_path
