@@ -3,6 +3,7 @@
 *draft*
 .venv
 venv
+.vscode*
 *.ipynb_checkpoints*
 *.log
 
