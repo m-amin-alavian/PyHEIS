@@ -1,11 +1,15 @@
 from tqdm import tqdm
 import requests
 
+import logging
 import pathlib
 import platform
 from zipfile import ZipFile
 
 from .metadata import Defults
+
+
+logging.basicConfig(filename="ihbs.log")
 
 
 def download_file(url:str, path:str|pathlib.Path|None=None, show_progress_bar:bool=False):
@@ -20,6 +24,7 @@ def download_file(url:str, path:str|pathlib.Path|None=None, show_progress_bar:bo
     else:
         file_name = path.name
 
+    logging.info(url)
     response = requests.get(url, stream=True)
     file_size = int(response.headers.get('content-length'))
     download_bar = tqdm(desc=f"downloading {file_name}", total=file_size, unit="B", unit_scale=True, disable=not show_progress_bar)
