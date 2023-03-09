@@ -20,11 +20,12 @@ class AccessFile:
         self.raw_data_directory = raw_data_directory
 
     def make_connection_string(self, directory):
-        files = [f.lower() for f in os.listdir(directory)]
         if sys.platform == "win32":
+            files = [f.lower() for f in os.listdir(directory)]
             join_string = "\\"
             driver = "Microsoft Access Driver (*.mdb, *.accdb)"
         else:
+            files = [f for f in os.listdir(directory)]
             join_string = "/"   
             driver = "MDBTools"
 
