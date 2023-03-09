@@ -33,6 +33,7 @@ class Defaults:
     original_dir = local_dir.joinpath(settings['original_folder_name'])
     raw_dir = local_dir.joinpath(settings['raw_data_folder_name'])
     csv_dir = local_dir.joinpath(settings['csv_folder_name'])
+    sqlite_dir = local_dir
     parquets_dir = local_dir.joinpath(settings['parquet_folder_name'])
 
     first_year = settings['default_first_year']
