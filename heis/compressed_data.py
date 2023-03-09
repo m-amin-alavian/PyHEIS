@@ -3,6 +3,7 @@ from tqdm import tqdm
 import subprocess
 import platform
 import pathlib
+import patoolib
 
 from .metadata import Defults
 from . import utils
@@ -33,6 +34,9 @@ def extract_with_7zip(compressed_file_path, output_directory):
         seven_zip_file_path = pathlib.Path().joinpath("7-Zip", "7zz")
         subprocess.run([seven_zip_file_path, "e", compressed_file_path, f"-o{output_directory}", "-y"])
 
+def extract_with_patool(compressed_file_path, output_directory):
+    patoolib.extract_archive(str(compressed_file_path), 
+                             outdir=str(output_directory), interactive=False)
 
 def inplace_extract(directory):
     while True:
@@ -55,7 +59,7 @@ def extract_a_file(year):
     file_path = Defults.compressed_dir.joinpath(f"{year}.rar")
     year_directory = Defults.raw_dir.joinpath(str(year))
     year_directory.mkdir(parents=True, exist_ok=True)
-    extract_with_7zip(file_path, year_directory)
+    extract_with_patool(file_path, year_directory)
     inplace_extract(year_directory)
     delete_empty_directories(year_directory)
 
@@ -64,5 +68,4 @@ def extract_all(from_year=None, to_year=None):
     from_year, to_year = utils.build_year_interval(from_year=from_year, to_year=to_year)
     for year in tqdm(range(from_year, to_year), desc="Unziping raw data", unit="file"):
         extract_a_file(year)
-        
         
