@@ -6,7 +6,7 @@ import pathlib
 import platform
 from zipfile import ZipFile
 
-from .metadata import Defults
+from .metadata import defaults
 
 
 logging.basicConfig(filename="ihbs.log")
@@ -47,7 +47,7 @@ def download_7zip():
 
 def build_year_interval(from_year, to_year):
     if (from_year is None) and (to_year is None):
-        return (Defults.first_year, Defults.last_year+1)
+        return (defaults.first_year, defaults.last_year+1)
     elif to_year is None:
         return (from_year, from_year+1)
     elif to_year <= from_year:

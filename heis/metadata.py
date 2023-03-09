@@ -39,3 +39,5 @@ class Defults:
     last_year = settings['defult_last_year']
 
     storage = settings['storage_technology']
+
+defaults = Defults()
