@@ -22,7 +22,7 @@ class Metadata:
     other = open_yaml(["metadata", "other.yaml"])
 
 
-class Defults:
+class Defaults:
     try:
         settings = open_yaml(["settings.yaml"])
     except FileNotFoundError:
@@ -35,9 +35,9 @@ class Defults:
     csv_dir = local_dir.joinpath(settings['csv_folder_name'])
     parquets_dir = local_dir.joinpath(settings['parquet_folder_name'])
 
-    first_year = settings['defult_first_year']
-    last_year = settings['defult_last_year']
+    first_year = settings['default_first_year']
+    last_year = settings['default_last_year']
 
     storage = settings['storage_technology']
 
-defaults = Defults()
+defaults = Defaults()
