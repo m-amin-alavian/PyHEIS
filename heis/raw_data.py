@@ -10,12 +10,12 @@ import os
 import sqlite3
 
 from .utils import build_year_interval, select_version, get_version
-from .metadata import Defults, Metadata
+from .metadata import defaults, Metadata
 
 logging.basicConfig(filename="raw_data.log", level=logging.DEBUG)
 
 class AccessFile:
-    def __init__(self, year, raw_data_directory=Defults.raw_dir):
+    def __init__(self, year, raw_data_directory=defaults.raw_dir):
         self.year = year
         self.raw_data_directory = raw_data_directory
 
@@ -97,8 +97,8 @@ def _save_extracted_table(access_file, table_name, storage_technology, csv_direc
             df.to_sql(table_name, sql_connection, if_exists='replace', index=False)
 
 
-def extract_tables_from_access_file(year:int, raw_data_directory=Defults.raw_dir,
-            storage_technology=Defults.storage, csv_directory=Defults.csv_dir, sql_directory=Defults.local_dir):
+def extract_tables_from_access_file(year:int, raw_data_directory=defaults.raw_dir,
+            storage_technology=defaults.storage, csv_directory=defaults.csv_dir, sql_directory=defaults.local_dir):
     access_file = AccessFile(year, raw_data_directory)
     access_file.create_connection()
     available_tables = access_file.get_tables_list()
@@ -111,8 +111,8 @@ def extract_tables_from_access_file(year:int, raw_data_directory=Defults.raw_dir
     access_file.close_connection()
 
 
-def extract_raw_data(from_year=None, to_year=None, raw_data_directory=Defults.raw_dir,
-            storage_technology=Defults.storage, csv_directory=Defults.csv_dir, sql_directory=Defults.local_dir):
+def extract_raw_data(from_year=None, to_year=None, raw_data_directory=defaults.raw_dir,
+            storage_technology=defaults.storage, csv_directory=defaults.csv_dir, sql_directory=defaults.local_dir):
     # TODO change function name!
     from_year, to_year = build_year_interval(from_year=from_year, to_year=to_year)
 
@@ -171,7 +171,7 @@ def _clean_table(df:pd.DataFrame, year:int|None=None):
     return df
 
 
-def open_table(year:int, table_name:str, urban:bool, source=Defults.storage):
+def open_table(year:int, table_name:str, urban:bool, source=defaults.storage):
     table_names = Metadata.columns_properties[table_name]["file_codes"]
     table_file_code = table_names[select_version(table_names, year)]
 
@@ -238,7 +238,7 @@ def load_table(year:int, table_name:str):
     return df
 
 
-def make_parquet(years:int|list|None=None, table_names:str|list|None=None, parquets_directory=Defults.parquets_dir):
+def make_parquet(years:int|list|None=None, table_names:str|list|None=None, parquets_directory=defaults.parquets_dir):
     """Make parquet data
        :param year: year to make data for
        :type year: int
@@ -250,11 +250,11 @@ def make_parquet(years:int|list|None=None, table_names:str|list|None=None, parqu
        :rtype: parquet table
     """
     if years is None:
-        years = list(range(Defults.first_year, Defults.last_year+1))
+        years = list(range(defaults.first_year, defaults.last_year+1))
     elif type(years) is int:
         years = [years]
     if table_names is None:
-        table_names = Defults.table_names
+        table_names = defaults.table_names
     elif type(table_names) is str:
         table_names = [table_names]
     pbar = tqdm(total=len(years)*len(table_names), desc="Preparing ...", unit="Table")
