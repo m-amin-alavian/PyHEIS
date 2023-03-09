@@ -4,21 +4,21 @@ import subprocess
 import platform
 import pathlib
 
-from .metadata import Defults
+from .metadata import Defaults
 from . import utils
 
 
 def download_a_file(year:int, replace:bool=True):
     file_name = f"{year}.rar"
-    file_url = f"{Defults.online_dir}/original_files/{file_name}"
-    local_path = Defults.compressed_dir.joinpath(file_name)
+    file_url = f"{Defaults.online_dir}/original_files/{file_name}"
+    local_path = Defaults.original_dir.joinpath(file_name)
     if (not pathlib.Path(local_path).exists()) or replace:
         utils.download_file(url=file_url, path=local_path, show_progress_bar=True)
 
 
 def download_files(from_year:int|None=None, to_year:int|None=None, replace:bool=False):
     from_year, to_year = utils.build_year_interval(from_year, to_year)
-    pathlib.Path(Defults.compressed_dir).mkdir(exist_ok =True, parents=True)
+    pathlib.Path(Defaults.original_dir).mkdir(exist_ok =True, parents=True)
     for year in range(from_year, to_year):
         download_a_file(year , replace=replace)
 
@@ -52,8 +52,8 @@ def delete_empty_directories(directory:pathlib.Path):
 
 
 def extract_a_file(year):
-    file_path = Defults.compressed_dir.joinpath(f"{year}.rar")
-    year_directory = Defults.raw_dir.joinpath(str(year))
+    file_path = Defaults.original_dir.joinpath(f"{year}.rar")
+    year_directory = Defaults.raw_dir.joinpath(str(year))
     year_directory.mkdir(parents=True, exist_ok=True)
     extract_with_7zip(file_path, year_directory)
     inplace_extract(year_directory)

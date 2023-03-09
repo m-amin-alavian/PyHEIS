@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from . import utils
-from .metadata import Defults, Metadata
+from .metadata import Defaults, Metadata
 
 
 def categoricla_columns(df, column_name, column_property):
@@ -64,7 +64,7 @@ def get_column_order(df, table_name):
     return new_order
 
 
-def load_table(table_name, from_year=None, to_year=None, standardize=False, note_year=None, parquets_directory=Defults.parquets_dir):
+def load_table(table_name, from_year=None, to_year=None, standardize=False, note_year=None, parquets_directory=Defaults.parquets_dir):
     start, end = utils.build_year_interval(from_year=from_year, to_year=to_year)
     if note_year is None:
         if (end - start) > 1:

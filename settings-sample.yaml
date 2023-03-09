@@ -4,8 +4,8 @@ local_directory: "Data"
 online_directory: "https://s3.ir-tbz-sh1.arvanstorage.ir/sdac/ihbs"
 
 # Years
-defult_first_year: 1363
-defult_last_year: 1400
+default_first_year: 1363
+default_last_year: 1400
 
 # Folder Names
 original_folder_name: '1_original_files'
@@ -18,4 +18,4 @@ parquet_folder_name: '4_parquets'
 storage_technology: csv
 
 # Map
-defult_map: humandata
+default_map: humandata
