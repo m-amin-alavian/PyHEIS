@@ -30,7 +30,7 @@ class Defults:
         
     local_dir = pathlib.Path(settings['local_directory'])
     online_dir = settings['online_directory']
-    compressed_dir = local_dir.joinpath(settings['compressed_folder_name'])
+    original_dir = local_dir.joinpath(settings['original_folder_name'])
     raw_dir = local_dir.joinpath(settings['raw_data_folder_name'])
     csv_dir = local_dir.joinpath(settings['csv_folder_name'])
     parquets_dir = local_dir.joinpath(settings['parquet_folder_name'])
