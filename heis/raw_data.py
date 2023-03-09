@@ -2,9 +2,9 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import pyodbc
-import sys
 
 import pathlib
+import platform
 import logging
 import os
 import sqlite3
@@ -20,17 +20,17 @@ class AccessFile:
         self.raw_data_directory = raw_data_directory
 
     def make_connection_string(self, directory):
-        files = [f.lower() for f in os.listdir(directory)]
-        if sys.platform == "win32":
+        if platform.system() == "Windows":
             join_string = "\\"
             driver = "Microsoft Access Driver (*.mdb, *.accdb)"
         else:
             join_string = "/"   
             driver = "MDBTools"
 
+        files =os.listdir(directory)
         accdb_file = None
         for file in files:
-            if (file.find('.mdb')>=0) or (file.find('.accdb')>=0):
+            if file.split(".")[-1].lower() in ['mdb', 'accdb']:
                 accdb_file = file
                 break
         if accdb_file is None:
@@ -43,7 +43,7 @@ class AccessFile:
         return conn_str
 
     def create_connection(self):
-        year_directory = pathlib.PurePath(self.raw_data_directory).joinpath(f"HEIS{self.year}")
+        year_directory = pathlib.Path(self.raw_data_directory).joinpath(str(self.year))
         connection_string = self.make_connection_string(year_directory)
         self.connection = pyodbc.connect(connection_string)
         self.cursor = self.connection.cursor()
