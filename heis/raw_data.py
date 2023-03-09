@@ -81,44 +81,37 @@ def _change_1380_table_names(year, table_name):
     return table_name
 
 
-def _save_extracted_table(access_file, table_name, storage_technology, csv_directory, sql_directory):
+def _save_extracted_table(access_file, table_name):
     try:
         df = access_file.get_table(table_name)
     except (pyodbc.ProgrammingError, pyodbc.OperationalError):
         tqdm.write(f"table {table_name} from {access_file.year} failed to extract")
         return
     table_name = _change_1380_table_names(access_file.year, table_name)
-    if storage_technology == "csv":
-        year_directory = csv_directory.joinpath(str(access_file.year))
+    if Defaults.storage == "csv":
+        year_directory = Defaults.csv_dir.joinpath(str(access_file.year))
         pathlib.Path(year_directory).mkdir(parents=True, exist_ok=True)
         df.to_csv(year_directory.joinpath(f"{table_name}.csv"), index=False)
-    elif storage_technology == "sql":
-        with sqlite3.connect(sql_directory.joinpath("raw_data.db")) as sql_connection:
+    elif Defaults.storage == "sql":
+        with sqlite3.connect(Defaults.sqlite_dir.joinpath("raw_data.db")) as sql_connection:
             df.to_sql(table_name, sql_connection, if_exists='replace', index=False)
 
 
-def extract_tables_from_access_file(year:int, raw_data_directory=Defaults.raw_dir,
-            storage_technology=Defaults.storage, csv_directory=Defaults.csv_dir, sql_directory=Defaults.local_dir):
-    access_file = AccessFile(year, raw_data_directory)
+def extract_tables_from_access_file(year:int):
+    access_file = AccessFile(year, Defaults.raw_dir)
     access_file.create_connection()
     available_tables = access_file.get_tables_list()
-    for table_name in tqdm(available_tables, desc=f"Extracting data from HEIS{year}", unit="table"):
-        _save_extracted_table(access_file=access_file,
-            table_name=table_name,
-            storage_technology=storage_technology,
-            csv_directory=csv_directory,
-            sql_directory=sql_directory)
+    for table_name in tqdm(available_tables, desc=f"Extracting data from {year}", unit="table"):
+        _save_extracted_table(access_file=access_file, table_name=table_name)
     access_file.close_connection()
 
 
-def extract_raw_data(from_year=None, to_year=None, raw_data_directory=Defaults.raw_dir,
-            storage_technology=Defaults.storage, csv_directory=Defaults.csv_dir, sql_directory=Defaults.local_dir):
+def extract_raw_data(from_year=None, to_year=None):
     # TODO change function name!
-    from_year, to_year = build_year_interval(from_year=from_year, to_year=to_year)
+    from_year, to_year = build_year_interval(from_year, to_year)
 
     for year in range(from_year, to_year):
-        extract_tables_from_access_file(year, raw_data_directory=raw_data_directory, storage_technology=storage_technology,
-            csv_directory=csv_directory, sql_directory=sql_directory)
+        extract_tables_from_access_file(year)
 
 
 def _get_column_property(year, table_name, column, urban=None):
