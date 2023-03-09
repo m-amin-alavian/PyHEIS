@@ -1,7 +1,7 @@
 
 # Main Directories
 local_directory: "Data"
-online_directory: "https://s3.ir-thr-at1.arvanstorage.com/gsmedb/HEIS"
+online_directory: "https://s3.ir-tbz-sh1.arvanstorage.ir/sdac/ihbs"
 
 # Years
 defult_first_year: 1363
