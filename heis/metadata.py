@@ -27,9 +27,11 @@ class Defaults:
         settings = open_yaml(["settings.yaml"])
     except FileNotFoundError:
         settings = open_yaml(["settings-sample.yaml"])
-        
-    local_dir = pathlib.Path(settings['local_directory'])
+
     online_dir = settings['online_directory']
+     
+    root_dir = pathlib.Path(__file__).parents[1]
+    local_dir = root_dir.joinpath(settings['local_directory'])
     original_dir = local_dir.joinpath(settings['original_folder_name'])
     raw_dir = local_dir.joinpath(settings['raw_data_folder_name'])
     csv_dir = local_dir.joinpath(settings['csv_folder_name'])

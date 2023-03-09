@@ -11,6 +11,7 @@ from . import utils
 def download_a_file(year:int, replace:bool=True):
     file_name = f"{year}.rar"
     file_url = f"{Defaults.online_dir}/original_files/{file_name}"
+    Defaults.original_dir.mkdir(parents=True, exist_ok=True)
     local_path = Defaults.original_dir.joinpath(file_name)
     if (not pathlib.Path(local_path).exists()) or replace:
         utils.download_file(url=file_url, path=local_path, show_progress_bar=True)
@@ -30,7 +31,7 @@ def extract_with_7zip(compressed_file_path, output_directory):
             utils.download_7zip()
         subprocess.run([seven_zip_file_path, "e", compressed_file_path, f"-o{output_directory}", "-y"], shell=True)
     elif platform.system() == "Linux":
-        seven_zip_file_path = pathlib.Path().joinpath("7-Zip", "7zz")
+        seven_zip_file_path = Defaults.root_dir.joinpath("7-Zip", "7zz")
         subprocess.run([seven_zip_file_path, "e", compressed_file_path, f"-o{output_directory}", "-y"])
 
 

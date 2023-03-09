@@ -33,16 +33,20 @@ def download_file(url:str, path:str|pathlib.Path|None=None, show_progress_bar:bo
             download_bar.update(len(chunk))
             f.write(chunk)
     download_bar.close()
+    return path
 
 
 def download_7zip():
     print(f"Downloading 7-Zip for {platform.system()} with {platform.architecture()[0]} architecture")
     file_name = f"{platform.system()}-{platform.architecture()[0]}.zip"
     file_path = pathlib.Path().joinpath("temp", file_name)
-    download_file(f"https://s3.ir-tbz-sh1.arvanstorage.ir/sdac/ihbs/7-Zip/{file_name}", show_progress_bar=True)
+    file_path = download_file(f"https://s3.ir-tbz-sh1.arvanstorage.ir/sdac/ihbs/7-Zip/{file_name}", show_progress_bar=True)
     with ZipFile(file_path) as zip_file:
-        zip_file.extractall(pathlib.Path())
+        zip_file.extractall(Defaults.root_dir)
     file_path.unlink()
+    
+    if platform.system() == "Linux":
+        Defaults.root_dir.joinpath("7-Zip", "7zz").chmod(0o771)
 
 
 def build_year_interval(from_year, to_year):
