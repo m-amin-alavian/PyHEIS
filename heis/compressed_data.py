@@ -5,12 +5,13 @@ docs
 import shutil
 import subprocess
 import platform
-import pathlib
+from pathlib import Path
 
 from tqdm import tqdm
+import pandas as pd
+import pyodbc
 
-from .metadata import Defaults
-from . import utils
+from . import metadata, utils
 
 
 def download_year_file(year: int, replace: bool = True) -> None:
@@ -25,10 +26,10 @@ def download_year_file(year: int, replace: bool = True) -> None:
 
     """
     file_name = f"{year}.rar"
-    file_url = f"{Defaults.online_dir}/original_files/{file_name}"
-    Defaults.original_dir.mkdir(parents=True, exist_ok=True)
-    local_path = Defaults.original_dir.joinpath(file_name)
-    if (not pathlib.Path(local_path).exists()) or replace:
+    file_url = f"{metadata.Defaults.online_dir}/original_files/{file_name}"
+    metadata.Defaults.archive_files.mkdir(parents=True, exist_ok=True)
+    local_path = metadata.Defaults.archive_files.joinpath(file_name)
+    if (not Path(local_path).exists()) or replace:
         utils.download_file(url=file_url, path=local_path, show_progress_bar=True)
 
 
@@ -51,12 +52,12 @@ def download_year_files_in_range(
 
     """
     from_year, to_year = utils.build_year_interval(from_year, to_year)
-    pathlib.Path(Defaults.original_dir).mkdir(exist_ok=True, parents=True)
+    Path(metadata.Defaults.original_dir).mkdir(exist_ok=True, parents=True)
     for year in range(from_year, to_year):
         download_year_file(year, replace=replace)
 
 
-def extract_archive_with_7zip(compressed_file_path: str, output_directory: str) -> None:
+def unpack_archive_with_7zip(compressed_file_path: str, output_directory: str) -> None:
     """
     Extracts the contents of a compressed file using the 7-Zip tool.
 
@@ -68,7 +69,7 @@ def extract_archive_with_7zip(compressed_file_path: str, output_directory: str) 
 
     """
     if platform.system() == "Windows":
-        seven_zip_file_path = pathlib.Path().joinpath("7-Zip", "7z.exe")
+        seven_zip_file_path = Path().joinpath("7-Zip", "7z.exe")
         if not seven_zip_file_path.exists():
             utils.download_7zip()
         subprocess.run(
@@ -83,7 +84,7 @@ def extract_archive_with_7zip(compressed_file_path: str, output_directory: str) 
             shell=True,
         )
     elif platform.system() == "Linux":
-        seven_zip_file_path = Defaults.root_dir.joinpath("7-Zip", "7zz")
+        seven_zip_file_path = metadata.Defaults.root_dir.joinpath("7-Zip", "7zz")
         subprocess.run(
             [
                 seven_zip_file_path,
@@ -96,7 +97,7 @@ def extract_archive_with_7zip(compressed_file_path: str, output_directory: str) 
         )
 
 
-def extract_archives_recursive(directory):
+def unpack_archives_recursive(directory):
     """
     Extract all archives with the extensions ".zip" and ".rar" found
     recursively in the given directory and its subdirectories using 7zip.
@@ -107,17 +108,17 @@ def extract_archives_recursive(directory):
 
     """
     while True:
-        all_files = list(pathlib.Path(directory).iterdir())
+        all_files = list(Path(directory).iterdir())
         archive_files = [file for file in all_files if file.suffix in (".zip", ".rar")]
         if len(archive_files) == 0:
             break
         for file in archive_files:
-            extract_archive_with_7zip(file, directory)
-            pathlib.Path(file).unlink()
+            unpack_archive_with_7zip(file, directory)
+            Path(file).unlink()
 
 
 
-def extract_yearly_data_archives(from_year=None, to_year=None):
+def unpack_yearly_data_archives(from_year=None, to_year=None):
     """
     Extracts all the yearly data archives from a starting year to an ending year.
 
@@ -145,24 +146,71 @@ def extract_yearly_data_archives(from_year=None, to_year=None):
     """
     from_year, to_year = utils.build_year_interval(from_year=from_year, to_year=to_year)
     for year in tqdm(range(from_year, to_year), desc="Unziping raw data", unit="file"):
-        _extract_yearly_data_archive(year)
+        _unpack_yearly_data_archive(year)
 
 
-def _extract_yearly_data_archive(year):
+def _unpack_yearly_data_archive(year):
     """
     Extracts data archive for the given year.
     """
-    file_path = Defaults.original_dir.joinpath(f"{year}.rar")
-    year_directory = Defaults.raw_dir.joinpath(str(year))
+    file_path = metadata.Defaults.archive_files.joinpath(f"{year}.rar")
+    year_directory = metadata.Defaults.unpacked_data.joinpath(str(year))
     if year_directory.exists():
         shutil.rmtree(year_directory)
     year_directory.mkdir(parents=True)
-    extract_archive_with_7zip(file_path, year_directory)
-    extract_archives_recursive(year_directory)
+    unpack_archive_with_7zip(file_path, year_directory)
+    unpack_archives_recursive(year_directory)
     _remove_created_directories(year_directory)
 
 
-def _remove_created_directories(directory: pathlib.Path):
+def _remove_created_directories(directory: Path):
     for path in directory.iterdir():
         if path.is_dir():
             shutil.rmtree(path)
+
+
+
+def get_access_table_list(year: int) -> list:
+    """
+    docs
+
+    """
+    connection_string = _make_connection_string(year)
+    with pyodbc.connect(connection_string) as connection:
+        cursor = connection.cursor()
+        table_list = cursor.tables()
+    table_list = [table for table in table_list if table.find("MSys") == -1]
+
+
+def get_access_table(year: int, table_name: str) -> pd.DataFrame:
+    """
+    docs
+
+    """
+    connection_string = _make_connection_string(year)
+    with pyodbc.connect(connection_string) as connection:
+        cursor = connection.cursor()
+        rows = cursor.execute(f"SELECT * FROM [{table_name}]").fetchall()
+        headers = [c[0] for c in cursor.description]
+    table = pd.DataFrame.from_records(rows, columns=headers)
+    return table
+
+
+def _make_connection_string(year: int):
+    if platform.system() == "Windows":
+        driver = "Microsoft Access Driver (*.mdb, *.accdb)"
+    else:
+        driver = "MDBTools"
+
+    year_directory = metadata.Defaults.unpacked_data.joinpath(str(year))
+    access_file_path = _find_access_file_by_extension(year_directory)
+    conn_str = f"DRIVER={{{driver}}};" f"DBQ={access_file_path};"
+    return conn_str
+
+
+def _find_access_file_by_extension(directory: Path) -> Path:
+    files = list(directory.iterdir())
+    for file in files:
+        if file.suffix in ["mdb", "accdb"]:
+            return file
+    raise FileNotFoundError

@@ -41,11 +41,10 @@ class Defaults:
     # local directories
     root_dir = pathlib.Path(__file__).parents[1]
     local_dir = root_dir.joinpath(settings['local_directory'])
-    original_dir = local_dir.joinpath(settings['original_folder_name'])
-    raw_dir = local_dir.joinpath(settings['raw_data_folder_name'])
-    csv_dir = local_dir.joinpath(settings['csv_folder_name'])
-    sqlite_dir = local_dir
-    parquets_dir = local_dir.joinpath(settings['parquet_folder_name'])
+    archive_files = local_dir.joinpath(settings['archive_files'])
+    unpacked_data = local_dir.joinpath(settings['unpacked_data'])
+    extracted_data = local_dir.joinpath(settings['extracted_data'])
+    processed_data = local_dir.joinpath(settings['processed_data'])
 
     first_year = settings['first_year']
     last_year = settings['last_year']

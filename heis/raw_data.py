@@ -19,7 +19,7 @@ from .metadata import Defaults, Metadata
 
 
 class AccessFile:
-    def __init__(self, year, raw_data_directory=Defaults.raw_dir):
+    def __init__(self, year, raw_data_directory=Defaults.unpacked_data):
         self.year = year
         self.raw_data_directory = raw_data_directory
 
@@ -89,7 +89,7 @@ def _save_extracted_table(access_file, table_name):
         return
     table_name = _change_1380_table_names(access_file.year, table_name)
     if Defaults.storage == "csv":
-        year_directory = Defaults.csv_dir.joinpath(str(access_file.year))
+        year_directory = Defaults.extracted_data.joinpath(str(access_file.year))
         pathlib.Path(year_directory).mkdir(parents=True, exist_ok=True)
         df.to_csv(year_directory.joinpath(f"{table_name}.csv"), index=False)
     elif Defaults.storage == "sql":
@@ -100,7 +100,7 @@ def _save_extracted_table(access_file, table_name):
 
 
 def extract_tables_from_access_file(year: int):
-    access_file = AccessFile(year, Defaults.raw_dir)
+    access_file = AccessFile(year, Defaults.unpacked_data)
     access_file.create_connection()
     available_tables = access_file.get_tables_list()
     for table_name in tqdm(
@@ -138,7 +138,6 @@ def _get_column_property(year, table_name, column, urban=None):
         except KeyError:
             missing_treatment = "pass"
         return missing_treatment
-    logging.debug("{}: {}".format(column, column_property))
     selected_property = get_version(column_property, year)
     return selected_property
 
@@ -254,7 +253,7 @@ def load_table(year: int, table_name: str):
 def make_parquet(
     years: int | list | None = None,
     table_names: str | list | None = None,
-    parquets_directory=Defaults.parquets_dir,
+    parquets_directory=Defaults.processed_data,
 ):
     """Make parquet data
     :param year: year to make data for

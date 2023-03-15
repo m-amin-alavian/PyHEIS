@@ -70,7 +70,7 @@ def get_column_order(df, table_name):
     return new_order
 
 
-def load_table(table_name, from_year=None, to_year=None, standardize=False, note_year=None, parquets_directory=Defaults.parquets_dir):
+def load_table(table_name, from_year=None, to_year=None, standardize=False, note_year=None, parquets_directory=Defaults.processed_data):
     start, end = utils.build_year_interval(
         from_year=from_year, to_year=to_year)
     if note_year is None:
