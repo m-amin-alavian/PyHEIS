@@ -60,7 +60,10 @@ def extract_a_file(year):
     file_path = Defaults.original_dir.joinpath(f"{year}.rar")
     year_directory = Defaults.raw_dir.joinpath(str(year))
     year_directory.mkdir(parents=True, exist_ok=True)
-    extract_with_patool(file_path, year_directory)
+    if Defaults.use_patool:
+        extract_with_patool(file_path, year_directory)
+    else:
+        extract_with_7zip(file_path, year_directory)
     inplace_extract(year_directory)
     delete_empty_directories(year_directory)
 

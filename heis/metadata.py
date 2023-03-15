@@ -42,3 +42,8 @@ class Defaults:
     last_year = settings['default_last_year']
 
     storage = settings['storage_technology']
+
+    try:
+        use_patool = settings['use_patool']
+    except:
+        use_patool = False
