@@ -169,8 +169,10 @@ def open_table(year:int, table_name:str, urban:bool, source=Defaults.storage):
     table_file_code = table_names[select_version(table_names, year)]
 
     file_name = _build_file_name(year=year, table=table_file_code, urban=urban)
+
     if source == "csv":
-        table = pd.read_csv(f"D:\\PyHEIS_Data\\3_csv_files\\{year}\\{file_name}", low_memory=False)
+        table = pd.read_csv(pathlib.Path(Defaults.csv_dir).joinpath(str(year)).
+                            joinpath(file_name), low_memory=False)
     elif source == "sql":
         # TODO: add sql support
         return
