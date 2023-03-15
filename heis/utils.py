@@ -9,9 +9,8 @@ from zipfile import ZipFile
 
 from tqdm import tqdm
 import requests
-import yaml
 
-from . import metadata
+from .metadata import Defaults
 
 
 def download_file(
@@ -34,7 +33,7 @@ def download_file(
         path = Path(path)
         file_name = path.name
     elif path is None:
-        temp_folder = metadata.Defaults.root_dir.joinpath("temp")
+        temp_folder = Defaults.root_dir.joinpath("temp")
         temp_folder.mkdir(exist_ok=True)
         file_name = url.split("/")[-1]
         path = temp_folder.joinpath(file_name)
@@ -70,15 +69,15 @@ def download_7zip():
     file_name = f"{platform.system()}-{platform.architecture()[0]}.zip"
     file_path = Path().joinpath("temp", file_name)
     file_path = download_file(
-        f"{metadata.Defaults.online_dir}/7-Zip/{file_name}",
+        f"{Defaults.online_dir}/7-Zip/{file_name}",
         show_progress_bar=True,
     )
     with ZipFile(file_path) as zip_file:
-        zip_file.extractall(metadata.Defaults.root_dir)
+        zip_file.extractall(Defaults.root_dir)
     file_path.unlink()
 
     if platform.system() == "Linux":
-        metadata.Defaults.root_dir.joinpath("7-Zip", "7zz").chmod(0o771)
+        Defaults.root_dir.joinpath("7-Zip", "7zz").chmod(0o771)
 
 
 def extract_with_7zip(compressed_file_path: str, output_directory: str) -> None:
@@ -108,7 +107,7 @@ def extract_with_7zip(compressed_file_path: str, output_directory: str) -> None:
             shell=True,
         )
     elif platform.system() == "Linux":
-        seven_zip_file_path = metadata.Defaults.root_dir.joinpath("7-Zip", "7zz")
+        seven_zip_file_path = Defaults.root_dir.joinpath("7-Zip", "7zz")
         if not seven_zip_file_path.exists():
             download_7zip()
         subprocess.run(
@@ -154,29 +153,10 @@ def build_year_interval(from_year: int | None, to_year: int | None) -> tuple[int
     ValueError: `from_year` must be less than `to_year`.
     """
     if from_year is None and to_year is None:
-        return metadata.Defaults.first_year, metadata.Defaults.last_year + 1
+        return Defaults.first_year, Defaults.last_year + 1
     if to_year is None:
         return from_year, from_year + 1
     if to_year < from_year:
         raise ValueError("`from_year` is greater than `to_year`")
 
     return (from_year, to_year + 1)
-
-
-def open_yaml(path):
-    """
-    Read the contents of a YAML file relative to the root directory and return it as a dictionary.
-
-    :param path: The path to the YAML file, relative to the root directory.
-    :type path: str
-
-    :return: The contents of the YAML file as a dictionary.
-    :rtype: dict
-
-    :raises yaml.YAMLError: If there is an error parsing the YAML file.
-
-    """
-    path = metadata.Defaults.root_dir.joinpath(path)
-    with open(path, mode="r", encoding="utf8") as yaml_file:
-        yaml_content = yaml.load(yaml_file, Loader=yaml.CLoader)
-    return yaml_content

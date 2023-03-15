@@ -5,7 +5,29 @@ docs
 from dataclasses import dataclass
 import pathlib
 
-from . import utils
+import yaml
+
+
+ROOT_DIRECTORY = pathlib.Path(__file__).parents[1]
+
+def open_yaml(path):
+    """
+    Read the contents of a YAML file relative to the root directory and return it as a dictionary.
+
+    :param path: The path to the YAML file, relative to the root directory.
+    :type path: str
+
+    :return: The contents of the YAML file as a dictionary.
+    :rtype: dict
+
+    :raises yaml.YAMLError: If there is an error parsing the YAML file.
+
+    """
+    path = ROOT_DIRECTORY.joinpath(path)
+    with open(path, mode="r", encoding="utf8") as yaml_file:
+        yaml_content = yaml.load(yaml_file, Loader=yaml.CLoader)
+    return yaml_content
+
 
 @dataclass
 class Metadata:
@@ -13,12 +35,12 @@ class Metadata:
     A dataclass for accessing metadata used in other parts of the project.
 
     """
-    columns_properties = utils.open_yaml("metadata/columns_properties.yaml")
-    maps = utils.open_yaml("metadata/maps.yaml")
-    house_hold_id = utils.open_yaml("metadata/house_hold_id.yaml")
-    commodity_codes = utils.open_yaml("metadata/commodity_codes.yaml")
-    standard_tables = utils.open_yaml("metadata/standard_tables.yaml")
-    other = utils.open_yaml("metadata/other.yaml")
+    columns_properties = open_yaml("metadata/columns_properties.yaml")
+    maps = open_yaml("metadata/maps.yaml")
+    house_hold_id = open_yaml("metadata/house_hold_id.yaml")
+    commodity_codes = open_yaml("metadata/commodity_codes.yaml")
+    standard_tables = open_yaml("metadata/standard_tables.yaml")
+    other = open_yaml("metadata/other.yaml")
 
 
 @dataclass
@@ -31,15 +53,15 @@ class Defaults:
 
     """
     try:
-        settings = utils.open_yaml(["settings.yaml"])
+        settings = open_yaml("settings.yaml")
     except FileNotFoundError:
-        settings = utils.open_yaml(["settings-sample.yaml"])
+        settings = open_yaml("settings-sample.yaml")
 
     # online directory
     online_dir = settings['online_directory']
 
     # local directories
-    root_dir = pathlib.Path(__file__).parents[1]
+    root_dir = ROOT_DIRECTORY
     local_dir = root_dir.joinpath(settings['local_directory'])
     archive_files = local_dir.joinpath(settings['archive_files'])
     unpacked_data = local_dir.joinpath(settings['unpacked_data'])
@@ -49,7 +71,6 @@ class Defaults:
     first_year = settings['first_year']
     last_year = settings['last_year']
 
-    storage = settings['storage_technology']
 
 
 def get_latest_version_year(metadata: dict, year: int) -> int | None:

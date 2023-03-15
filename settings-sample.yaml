@@ -13,9 +13,5 @@ unpacked_data: '2_unpacked_data'
 extracted_data: '3_extracted_data'
 processed_data: 'processed_data'
 
-# Storage Method
-# can be csv or sql
-storage_technology: csv
-
 # Map
 default_map: humandata
