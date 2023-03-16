@@ -10,6 +10,7 @@ import yaml
 
 ROOT_DIRECTORY = pathlib.Path(__file__).parents[1]
 
+
 def open_yaml(path):
     """
     Read the contents of a YAML file relative to the root directory and return it as a dictionary.
@@ -35,6 +36,7 @@ class Metadata:
     A dataclass for accessing metadata used in other parts of the project.
 
     """
+
     columns_properties = open_yaml("metadata/columns_properties.yaml")
     maps = open_yaml("metadata/maps.yaml")
     house_hold_id = open_yaml("metadata/house_hold_id.yaml")
@@ -52,25 +54,25 @@ class Defaults:
     the sample file named `settings-sample.yaml`.
 
     """
+
     try:
         settings = open_yaml("settings.yaml")
     except FileNotFoundError:
         settings = open_yaml("settings-sample.yaml")
 
     # online directory
-    online_dir = settings['online_directory']
+    online_dir = settings["online_directory"]
 
     # local directories
     root_dir = ROOT_DIRECTORY
-    local_dir = root_dir.joinpath(settings['local_directory'])
-    archive_files = local_dir.joinpath(settings['archive_files'])
-    unpacked_data = local_dir.joinpath(settings['unpacked_data'])
-    extracted_data = local_dir.joinpath(settings['extracted_data'])
-    processed_data = local_dir.joinpath(settings['processed_data'])
+    local_dir = root_dir.joinpath(settings["local_directory"])
+    archive_files = local_dir.joinpath(settings["archive_files"])
+    unpacked_data = local_dir.joinpath(settings["unpacked_data"])
+    extracted_data = local_dir.joinpath(settings["extracted_data"])
+    processed_data = local_dir.joinpath(settings["processed_data"])
 
-    first_year = settings['first_year']
-    last_year = settings['last_year']
-
+    first_year = settings["first_year"]
+    last_year = settings["last_year"]
 
 
 def get_latest_version_year(metadata: dict, year: int) -> int | None:

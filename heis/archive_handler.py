@@ -186,7 +186,9 @@ def extract_tables_from_access_file(year: int) -> None:
 
     """
     table_list = get_access_table_list(year)
-    for table_name in tqdm(table_list, desc=f"Extracting data from {year}", unit="table"):
+    for table_name in tqdm(
+        table_list, desc=f"Extracting data from {year}", unit="table"
+    ):
         extract_table(year, table_name)
 
 

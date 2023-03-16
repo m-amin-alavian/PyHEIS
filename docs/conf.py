@@ -7,26 +7,26 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
 
-project = 'Iran Household Budget Survey'
-copyright = '2023, Alavian & Mohammadi'
-author = 'Alavian & Mohammadi'
-release = '0.1'
+sys.path.insert(0, os.path.abspath(".."))
+
+project = "Iran Household Budget Survey"
+copyright = "2023, Alavian & Mohammadi"
+author = "Alavian & Mohammadi"
+release = "0.1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc']
+extensions = ["sphinx.ext.autodoc"]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
-
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
-autodoc_mock_imports = ['pyodbc']
+html_static_path = ["_static"]
+autodoc_mock_imports = ["pyodbc"]

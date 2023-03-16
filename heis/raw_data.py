@@ -3,6 +3,7 @@ docs
 
 """
 
+import logging
 import pathlib
 import platform
 import os
@@ -88,15 +89,15 @@ def _save_extracted_table(access_file, table_name):
         tqdm.write(f"table {table_name} from {access_file.year} failed to extract")
         return
     table_name = _change_1380_table_names(access_file.year, table_name)
-    if Defaults.storage == "csv":
-        year_directory = Defaults.extracted_data.joinpath(str(access_file.year))
-        pathlib.Path(year_directory).mkdir(parents=True, exist_ok=True)
-        df.to_csv(year_directory.joinpath(f"{table_name}.csv"), index=False)
-    elif Defaults.storage == "sql":
-        with sqlite3.connect(
-            Defaults.sqlite_dir.joinpath("raw_data.db")
-        ) as sql_connection:
-            df.to_sql(table_name, sql_connection, if_exists="replace", index=False)
+    # if Defaults.storage == "csv":
+    year_directory = Defaults.extracted_data.joinpath(str(access_file.year))
+    pathlib.Path(year_directory).mkdir(parents=True, exist_ok=True)
+    df.to_csv(year_directory.joinpath(f"{table_name}.csv"), index=False)
+    # elif Defaults.storage == "sql":
+    #     with sqlite3.connect(
+    #         Defaults.sqlite_dir.joinpath("raw_data.db")
+    #     ) as sql_connection:
+    #         df.to_sql(table_name, sql_connection, if_exists="replace", index=False)
 
 
 def extract_tables_from_access_file(year: int):
@@ -169,18 +170,20 @@ def _clean_table(df: pd.DataFrame, year: int | None = None):
     return df
 
 
-def open_table(year: int, table_name: str, urban: bool, source=Defaults.storage):
+def open_table(year: int, table_name: str, urban: bool):
     table_names = Metadata.columns_properties[table_name]["file_codes"]
     table_file_code = table_names[select_version(table_names, year)]
 
     file_name = _build_file_name(year=year, table=table_file_code, urban=urban)
 
-    if source == "csv":
-        table = pd.read_csv(pathlib.Path(Defaults.csv_dir).joinpath(str(year)).
-                            joinpath(file_name), low_memory=False)
-    elif source == "sql":
-        # TODO: add sql support
-        return
+    # if source == "csv":
+    table = pd.read_csv(
+        pathlib.Path(Defaults.extracted_data).joinpath(str(year)).joinpath(file_name),
+        low_memory=False,
+    )
+    # elif source == "sql":
+    #     # TODO: add sql support
+    #     return
 
     table = _clean_table(table, year)
     return table

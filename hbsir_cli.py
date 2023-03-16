@@ -7,8 +7,9 @@ import click
 from heis.archive_handler import (
     download_year_files_in_range,
     unpack_yearly_data_archives,
-    extract_data_from_access_files
+    extract_data_from_access_files,
 )
+
 
 @click.group()
 def cli():
@@ -33,6 +34,8 @@ def download(fromyear=None, toyear=None, replace=False):
     Download Data Archive Files
     """
     download_year_files_in_range(fromyear, toyear, replace)
+
+
 cli.add_command(download)
 
 
@@ -51,6 +54,8 @@ def unpack(fromyear=None, toyear=None):
     Unpack Data Archive Files
     """
     unpack_yearly_data_archives(fromyear, toyear)
+
+
 cli.add_command(unpack)
 
 
@@ -69,6 +74,8 @@ def extract(fromyear=None, toyear=None):
     Extract Data from Archive Files
     """
     extract_data_from_access_files(fromyear, toyear)
+
+
 cli.add_command(extract)
 
 
