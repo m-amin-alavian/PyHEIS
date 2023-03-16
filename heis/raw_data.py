@@ -1,21 +1,25 @@
+"""
+docs
+
+"""
+
+import pathlib
+import platform
+import os
+import sqlite3
+
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import pyodbc
 
-import pathlib
-import platform
-import logging
-import os
-import sqlite3
 
 from .utils import build_year_interval, select_version, get_version
 from .metadata import Defaults, Metadata
 
-logging.basicConfig(filename="raw_data.log", level=logging.DEBUG)
 
 class AccessFile:
-    def __init__(self, year, raw_data_directory=Defaults.raw_dir):
+    def __init__(self, year, raw_data_directory=Defaults.unpacked_data):
         self.year = year
         self.raw_data_directory = raw_data_directory
 
@@ -24,22 +28,19 @@ class AccessFile:
             join_string = "\\"
             driver = "Microsoft Access Driver (*.mdb, *.accdb)"
         else:
-            join_string = "/"   
+            join_string = "/"
             driver = "MDBTools"
 
-        files =os.listdir(directory)
+        files = os.listdir(directory)
         accdb_file = None
         for file in files:
-            if file.split(".")[-1].lower() in ['mdb', 'accdb']:
+            if file.split(".")[-1].lower() in ["mdb", "accdb"]:
                 accdb_file = file
                 break
         if accdb_file is None:
             raise FileNotFoundError
 
-        conn_str = (
-            f"DRIVER={{{driver}}};"
-            f"DBQ={directory}{join_string}{accdb_file};"
-            )
+        conn_str = f"DRIVER={{{driver}}};" f"DBQ={directory}{join_string}{accdb_file};"
         return conn_str
 
     def create_connection(self):
@@ -56,7 +57,7 @@ class AccessFile:
         available_tables = []
         for row in self.cursor.tables():
             table_name = row.table_name
-            if (table_name.find("MSys")==-1):
+            if table_name.find("MSys") == -1:
                 available_tables.append(table_name)
         return available_tables
 
@@ -73,11 +74,10 @@ class AccessFile:
         return df
 
 
-
 def _change_1380_table_names(year, table_name):
     if year == 1380:
-        if table_name in Metadata.other['unusual_names_of_1380']:
-            table_name = Metadata.other['unusual_names_of_1380'][table_name]
+        if table_name in Metadata.other["unusual_names_of_1380"]:
+            table_name = Metadata.other["unusual_names_of_1380"][table_name]
     return table_name
 
 
@@ -89,19 +89,23 @@ def _save_extracted_table(access_file, table_name):
         return
     table_name = _change_1380_table_names(access_file.year, table_name)
     if Defaults.storage == "csv":
-        year_directory = Defaults.csv_dir.joinpath(str(access_file.year))
+        year_directory = Defaults.extracted_data.joinpath(str(access_file.year))
         pathlib.Path(year_directory).mkdir(parents=True, exist_ok=True)
         df.to_csv(year_directory.joinpath(f"{table_name}.csv"), index=False)
     elif Defaults.storage == "sql":
-        with sqlite3.connect(Defaults.sqlite_dir.joinpath("raw_data.db")) as sql_connection:
-            df.to_sql(table_name, sql_connection, if_exists='replace', index=False)
+        with sqlite3.connect(
+            Defaults.sqlite_dir.joinpath("raw_data.db")
+        ) as sql_connection:
+            df.to_sql(table_name, sql_connection, if_exists="replace", index=False)
 
 
-def extract_tables_from_access_file(year:int):
-    access_file = AccessFile(year, Defaults.raw_dir)
+def extract_tables_from_access_file(year: int):
+    access_file = AccessFile(year, Defaults.unpacked_data)
     access_file.create_connection()
     available_tables = access_file.get_tables_list()
-    for table_name in tqdm(available_tables, desc=f"Extracting data from {year}", unit="table"):
+    for table_name in tqdm(
+        available_tables, desc=f"Extracting data from {year}", unit="table"
+    ):
         _save_extracted_table(access_file=access_file, table_name=table_name)
     access_file.close_connection()
 
@@ -128,23 +132,24 @@ def _get_column_property(year, table_name, column, urban=None):
         column_property = all_columns[column]
     except KeyError:
         try:
-            missing_treatment = Metadata.columns_properties[table_name]['property']['missings']
+            missing_treatment = Metadata.columns_properties[table_name]["property"][
+                "missings"
+            ]
         except KeyError:
             missing_treatment = "pass"
         return missing_treatment
-    logging.debug("{}: {}".format(column, column_property))
     selected_property = get_version(column_property, year)
     return selected_property
 
 
-def _build_file_name(year:int, table:str, urban:bool):
+def _build_file_name(year: int, table: str, urban: bool):
     year_part = year % 100 if year < 1400 else year
     rural_urban = "U" if urban else "R"
     file_name = f"{rural_urban}{year_part}{table}.csv"
     return file_name
 
 
-def _fix_bad_ids(df, year:int|None=None):
+def _fix_bad_ids(df, year: int | None = None):
     if df.iloc[:, 0].dtype is str:
         if year == 1374:
             filt = df.iloc[:, 0].str.isnumeric()
@@ -152,7 +157,7 @@ def _fix_bad_ids(df, year:int|None=None):
     return df
 
 
-def _clean_table(df:pd.DataFrame, year:int|None=None):
+def _clean_table(df: pd.DataFrame, year: int | None = None):
     df = df.copy()
     for column in df.columns:
         if pd.api.types.is_numeric_dtype(df[column]):
@@ -164,7 +169,7 @@ def _clean_table(df:pd.DataFrame, year:int|None=None):
     return df
 
 
-def open_table(year:int, table_name:str, urban:bool, source=Defaults.storage):
+def open_table(year: int, table_name: str, urban: bool, source=Defaults.storage):
     table_names = Metadata.columns_properties[table_name]["file_codes"]
     table_file_code = table_names[select_version(table_names, year)]
 
@@ -199,24 +204,32 @@ def apply_columns_properties(table, year, table_name, urban=None):
         if "type" in column_props:
             if column_props["type"] == "boolean":
                 filt = table[column].notna()
-                table.loc[filt, column] = (table[column] == column_props["true_condition"])
+                table.loc[filt, column] = (
+                    table[column] == column_props["true_condition"]
+                )
             elif column_props["type"] == "category":
                 table[column] = table[column].astype("Int32").astype("category")
-                table[column] = table[column].cat.rename_categories(column_props["categories"])
+                table[column] = table[column].cat.rename_categories(
+                    column_props["categories"]
+                )
             elif column_props["type"] == "string":
                 pass
             else:
-                table[column] = pd.to_numeric(table[column], downcast=column_props["type"])
+                table[column] = pd.to_numeric(
+                    table[column], downcast=column_props["type"]
+                )
         if "new_name" in column_props:
             table = table.rename(columns={column: column_props["new_name"]})
     return table
 
 
-def load_table(year:int, table_name:str):
+def load_table(year: int, table_name: str):
     logging.debug(f"Loading {table_name} for {year}")
     try:
         urban_rural = Metadata.columns_properties[table_name]["property"]["urban_rural"]
-        logging.debug(f"{table_name} table in {year} has separated rural and urban property")
+        logging.debug(
+            f"{table_name} table in {year} has separated rural and urban property"
+        )
     except KeyError:
         urban_rural = []
 
@@ -224,41 +237,50 @@ def load_table(year:int, table_name:str):
     for urban in [True, False]:
         df = open_table(year=year, table_name=table_name, urban=urban)
         if year in urban_rural:
-            df = apply_columns_properties(df, year=year, table_name=table_name, urban=urban)
+            df = apply_columns_properties(
+                df, year=year, table_name=table_name, urban=urban
+            )
         else:
-            df = apply_columns_properties(df, year=year, table_name=table_name, urban=None)
+            df = apply_columns_properties(
+                df, year=year, table_name=table_name, urban=None
+            )
         logging.debug("year: {}, table: {} poperties applied".format(year, table_name))
         dfs.append(df)
     df = pd.concat(dfs, axis="index", ignore_index=True)
     return df
 
 
-def make_parquet(years:int|list|None=None, table_names:str|list|None=None, parquets_directory=Defaults.parquets_dir):
+def make_parquet(
+    years: int | list | None = None,
+    table_names: str | list | None = None,
+    parquets_directory=Defaults.processed_data,
+):
     """Make parquet data
-       :param year: year to make data for
-       :type year: int
-       :param table_name: name of table to use
-       :type table_name: str
-       :param parquets_directory: directory for the file
-       :type parquets_directory: str
-       :return: A parquet table
-       :rtype: parquet table
+    :param year: year to make data for
+    :type year: int
+    :param table_name: name of table to use
+    :type table_name: str
+    :param parquets_directory: directory for the file
+    :type parquets_directory: str
+    :return: A parquet table
+    :rtype: parquet table
     """
     if years is None:
-        years = list(range(Defaults.first_year, Defaults.last_year+1))
+        years = list(range(Defaults.first_year, Defaults.last_year + 1))
     elif type(years) is int:
         years = [years]
     if table_names is None:
         table_names = Defaults.table_names
     elif type(table_names) is str:
         table_names = [table_names]
-    pbar = tqdm(total=len(years)*len(table_names), desc="Preparing ...", unit="Table")
+    pbar = tqdm(total=len(years) * len(table_names), desc="Preparing ...", unit="Table")
     for year in years:
         for table_name in table_names:
             pbar.update()
             pbar.desc = f"Year: {year}, Table: {table_name}"
             table = load_table(year, table_name)
             pathlib.Path(parquets_directory).mkdir(exist_ok=True)
-            table.to_parquet(parquets_directory.joinpath(f"{year}_{table_name}.parquet"))
+            table.to_parquet(
+                parquets_directory.joinpath(f"{year}_{table_name}.parquet")
+            )
     pbar.close()
-

@@ -1,21 +1,17 @@
 
 # Main Directories
 local_directory: "Data"
-online_directory: "https://s3.ir-tbz-sh1.arvanstorage.ir/sdac/ihbs"
+online_directory: "https://s3.ir-tbz-sh1.arvanstorage.ir/sdac/HBSIR"
 
 # Years
-default_first_year: 1363
-default_last_year: 1400
+first_year: 1363
+last_year: 1400
 
 # Folder Names
-original_folder_name: '1_original_files'
-raw_data_folder_name: '2_raw_data'
-csv_folder_name: '3_csv_files'
-parquet_folder_name: '4_parquets'
-
-# Storage Method
-# can be csv or sql
-storage_technology: csv
+archive_files: '1_archive_files'
+unpacked_data: '2_unpacked_data'
+extracted_data: '3_extracted_data'
+processed_data: 'processed_data'
 
 # Map
 default_map: humandata
