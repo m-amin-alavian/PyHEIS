@@ -41,7 +41,7 @@
 
 
 household_information:
-    file_codes:
+    file_code:
         1363: null
         1388: "Data"
 
@@ -69,7 +69,7 @@ household_information:
 
 
 members_properties:
-    file_codes:
+    file_code:
         1363: "P1"
 
     items:
@@ -261,7 +261,7 @@ members_properties:
 
 
 house_specifications:
-    file_codes:
+    file_code:
         1363: "P2"
 
 
@@ -410,7 +410,7 @@ EXPENDITURE_ITEMS:
 
 
 food:
-    file_codes:
+    file_code:
         1363: "P3S01"
     
     columns:
@@ -452,7 +452,7 @@ food:
 
 
 cigaret:
-    file_codes:
+    file_code:
         1363: null
         1383: "P3S02"
 
@@ -461,7 +461,7 @@ cigaret:
 
 
 cloth:
-    file_codes:
+    file_code:
         1363: "P3S02"
         1383: "P3S03"
 
@@ -470,7 +470,7 @@ cloth:
 
 
 home:
-    file_codes:
+    file_code:
         1363: "P3S03"
         1383: "P3S04"
 
@@ -478,7 +478,7 @@ home:
         <<: *expenditure_base_columns
 
 furniture:
-    file_codes:
+    file_code:
         1363: "P3S04"
         1383: "P3S05"
 
@@ -487,7 +487,7 @@ furniture:
 
 
 medical:
-    file_codes:
+    file_code:
         1363: "P3S05"
         1383: "P3S06"
 
@@ -496,7 +496,7 @@ medical:
 
 
 transportation:
-    file_codes:
+    file_code:
         1363: "P3S06"
         1383: "P3S07"
 
@@ -505,7 +505,7 @@ transportation:
 
 
 communication:
-    file_codes:
+    file_code:
         1363: null
         1383: "P3S08"
 
@@ -514,7 +514,7 @@ communication:
 
 
 entertainment:
-    file_codes:
+    file_code:
         1363: "P3S07"
         1383: "P3S09"
 
@@ -523,7 +523,7 @@ entertainment:
 
 
 education:
-    file_codes:
+    file_code:
         1363: null
         1383: "P3S10"
 
@@ -532,7 +532,7 @@ education:
 
 
 hotel:
-    file_codes:
+    file_code:
         1363: null
         1383: "P3S11"
 
@@ -541,7 +541,7 @@ hotel:
 
 
 other:
-    file_codes:
+    file_code:
         1363: "P3S08"
         1383: "P3S12"
 
@@ -550,7 +550,7 @@ other:
 
 
 durable:
-    file_codes:
+    file_code:
         1363: "P3S09"
         1383: "P3S13"
 
@@ -559,7 +559,7 @@ durable:
 
 
 investment:
-    file_codes:
+    file_code:
         1363: null
         1366: "P3S10"
         1375: null
@@ -666,7 +666,73 @@ INCOME_ITEMS:
 
 
 employment_income:
-    file_codes:
+    1363: null
+    1369:
+        file_code: "P4S1"
+        columns:
+            1369:
+                <<: *income_base_columns
+                COL02: *income_job_code
+                COL03: *income_workplace_activity
+                COL04: *income_sector_1
+                COL06: *income_yearly_gross
+                COL08: *income_yearly_continuous
+                COL10: *income_yearly_temporary
+                COL12: *income_yearly_net
+
+            1370:
+                <<: *income_base_columns
+                COL02: *income_job_code
+                COL03: *income_workplace_activity
+                COL04: *income_sector_1
+                COL05: *income_monthly_gross
+                COL06: *income_yearly_gross
+                COL07: *income_monthly_continuous
+                COL08: *income_yearly_continuous
+                COL09: *income_monthly_temporary
+                COL10: *income_yearly_temporary
+                COL11: *income_monthly_net
+                COL12: *income_yearly_net
+
+            1374:
+                <<: *income_base_columns
+                COL02: *income_activity_status
+                COL03: *income_job_code
+                COL04: *income_workplace_activity
+                COL05:
+                    1374: *income_sector_1
+                    1376: *income_sector_2
+                COL06: *income_monthly_gross
+                COL07: *income_yearly_gross
+                COL08: *income_monthly_continuous
+                COL09: *income_yearly_continuous
+                COL10: *income_monthly_temporary
+                COL11: *income_yearly_temporary
+                COL12: *income_monthly_net
+                COL13: *income_yearly_net
+
+    1384:
+        file_code: "P4S01"
+        columns:
+            <<: *income_base_columns
+            DYCOL02: *income_activity_status
+            DYCOL03: *income_job_code
+            DYCOL04: *income_workplace_activity
+            DYCOL05: *income_sector_2
+            DYCOL06: *income_working_hours_per_day
+            DYCOL07: *income_working_day_per_week
+            DYCOL08: *income_monthly_gross
+            DYCOL09: *income_yearly_gross
+            DYCOL10: *income_monthly_continuous
+            DYCOL11: *income_yearly_continuous
+            DYCOL12: *income_monthly_temporary
+            DYCOL13: *income_yearly_temporary
+            DYCOL14: *income_monthly_net
+            DYCOL15: *income_yearly_net
+
+
+old_employment_income:
+    file_code:
         1363: null
         1369: "P4S1"
         1384: "P4S01"
@@ -759,7 +825,7 @@ employment_income:
 
 
 self_employed_income:
-    file_codes:
+    file_code:
         1363: null
         1369: "P4S2"
         1384: "P4S02"
@@ -785,7 +851,7 @@ self_employed_income:
 
 
 other_income:
-    file_codes:
+    file_code:
         1363: null
         1369: "P4S3"
         1384: "P4S03"
@@ -826,7 +892,7 @@ other_income:
 
 
 subsidy:
-    file_codes:
+    file_code:
         1363: null
         1390: "P4S04"
 
@@ -854,7 +920,7 @@ subsidy:
 
 
 public_employment_income: &public_employment_income
-    file_codes:
+    file_code:
         1363: P4S1
         1369: null
 
@@ -892,25 +958,25 @@ public_employment_income: &public_employment_income
 
 private_employment_income:
     <<: *public_employment_income
-    file_codes:
+    file_code:
         1363: P4S2
         1369: null
 
 
 agricultural_self_employed_income:
-    file_codes:
+    file_code:
         1363: P4S3
         1369: null
 
 
 non_agricultural_self_employed_income:
-    file_codes:
+    file_code:
         1363: P4S4
         1369: null
 
 
 old_other_income:
-    file_codes:
+    file_code:
         1363: P4S5
         1369: null
 
