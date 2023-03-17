@@ -655,6 +655,10 @@ INCOME_ITEMS:
         new_name: "Yearly_Net_Income"
         type: "float"
 
+    income_currently_in_this_job: &income_currently_in_this_job
+        new_name: "Currently_in_This_Job"
+        type: "boolean"
+        true_condition: 1
 
     # # # Base Items
 
@@ -924,41 +928,30 @@ subsidy:
 
 
 public_employment_income: &public_employment_income
-    file_code:
-        1363: P4S1
-        1369: null
-
-    property:
-        urban_rural: [1363, 1364, 1365, 1366, 1367, 1368]
-
-    items:
-        currently_in_this_job: &currently_in_this_job
-            new_name: "Currently_in_This_Job"
-            type: "boolean"
-            true_condition: 1
-
-    columns:
-        urban: 
-            <<: *income_base_columns
-            COL01:
-                <<: *income_member_number
-                replace:
-                    "0]": "01"
-            COL02: *income_job_code
-            COL03: *currently_in_this_job
-            COL05: *income_yearly_gross
-            COL07: *income_yearly_continuous
-            COL09: *income_yearly_temporary
-            COL11: *income_yearly_net
+    
+    1363:
+        urban:
+            file_code: P4S1
+            columns:
+                <<: *income_base_columns
+                COL01: *income_member_number
+                COL02: *income_job_code
+                COL03: *income_currently_in_this_job
+                COL05: *income_yearly_gross
+                COL07: *income_yearly_continuous
+                COL09: *income_yearly_temporary
+                COL11: *income_yearly_net
         rural:
-            <<: *income_base_columns
-            COL01: *income_member_number
-            COL02: *income_job_code
-            COL03: *currently_in_this_job
-            COL05: *income_yearly_continuous
-            COL07: *income_yearly_temporary
-            COL09: *income_yearly_net
-
+            file_code: P4S1
+            columns:
+                <<: *income_base_columns
+                COL01: *income_member_number
+                COL02: *income_job_code
+                COL03: *income_currently_in_this_job
+                COL05: *income_yearly_continuous
+                COL07: *income_yearly_temporary
+                COL09: *income_yearly_net
+    1369: null
 
 private_employment_income:
     <<: *public_employment_income
