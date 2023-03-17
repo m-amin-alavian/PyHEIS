@@ -15,6 +15,7 @@ from . import metadata
 
 defaults = metadata.Defaults()
 
+
 def download_file(
     url: str, path: str | Path | None = None, show_progress_bar: bool = False
 ) -> Path:
