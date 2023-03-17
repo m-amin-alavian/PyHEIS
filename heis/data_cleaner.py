@@ -126,7 +126,7 @@ def _build_file_path(table_name: str, year: int, urban: bool) -> Path:
 
 
 def _get_table_metadata(table_name: str, year: int, urban: bool | None = None) -> dict:
-    table_metadata = metadata_obj.columns_properties[table_name]
+    table_metadata = metadata_obj.tables[table_name]
     table_metadata = get_metadata_version(table_metadata, year)
 
     if urban is True:
@@ -156,9 +156,10 @@ def clean_table_with_metadata(table_name: str, year: int) -> pd.DataFrame:
     table = load_table_data(table_name, year)
     cleaned_table = pd.DataFrame()
     for column_name, column in table.items():
-        column_metadata = _get_column_metadata(table_name=table_name,
-            column_name=column_name,year=year)
-        column = _apply_metadata_to_column(column=column, column_metadata=column_metadata)
+        column_metadata = _get_column_metadata(table_name, column_name, year)
+        if column_metadata == "drop":
+            continue
+        column = _apply_metadata_to_column(column, column_metadata)
         cleaned_table[column_metadata["new_name"]] = column
     return cleaned_table
 
@@ -184,7 +185,8 @@ def _apply_type_to_column(column: pd.Series, column_metadata: dict) -> pd.Series
     non_empty = column.notna()
     new_column = pd.Series(np.nan, index=column.index)
     if column_metadata["type"] == "boolian":
-        new_column.loc[non_empty] = column == column_metadata["true_condition"]
+        new_column = column.astype("Int32").astype("category")
+        new_column.loc[non_empty] = new_column == column_metadata["true_condition"]
     elif column_metadata["type"] in ("unsigned", "integer", "float"):
         new_column = pd.to_numeric(column, downcast=column_metadata["type"])
     elif column_metadata["type"] == "category":

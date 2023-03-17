@@ -417,20 +417,22 @@ food:
         <<: *expenditure_base_columns
 
         COL3: *expenditure_provision_method
-        DYCOL02: *expenditure_provision_method
-
         COL4:
             1363: null
             1369: *expenditure_price_system
             1374: null
             1383: *expenditure_grams
-        DYCOL03: *expenditure_grams
-
-        COL4_5: *expenditure_kilos
-        COL5_6: *expenditure_kilos
-        COL5: *expenditure_kilos
-        DYCOL04: *expenditure_kilos
-
+        COL4_5:
+            1363: *expenditure_kilos
+            1369: null
+            1374: *expenditure_kilos
+            1383: null
+        COL5_6:
+            1363: null
+            1369: *expenditure_kilos
+            1374: null
+        COL5:
+            1383: *expenditure_kilos
         COL6:
             1363: *expenditure_amount
             1369: null
@@ -446,18 +448,20 @@ food:
             1369: *expenditure_amount
             1374: null
 
+        DYCOL02: *expenditure_provision_method
+        DYCOL03: *expenditure_grams
+        DYCOL04: *expenditure_kilos
         DYCOL05: *expenditure_price
         DYCOL06: *expenditure_amount
         DYCOL07: "drop"
 
 
 cigaret:
-    file_code:
-        1363: null
-        1383: "P3S02"
-
-    columns:
-        <<: *expenditure_common_columns
+    1363: null
+    1383:
+        file_code: "P3S02"
+        columns:
+            <<: *expenditure_common_columns
 
 
 cloth:
@@ -505,12 +509,12 @@ transportation:
 
 
 communication:
-    file_code:
-        1363: null
-        1383: "P3S08"
+    1363: null
+    1383:
+        file_code: "P3S08"
 
-    columns:
-        <<: *expenditure_common_columns
+        columns:
+            <<: *expenditure_common_columns
 
 
 entertainment:

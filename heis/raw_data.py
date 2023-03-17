@@ -122,18 +122,18 @@ def extract_raw_data(from_year=None, to_year=None):
 def _get_column_property(year, table_name, column, urban=None):
     if urban is None:
         try:
-            all_columns = Metadata.columns_properties[table_name]["columns"]["both"]
+            all_columns = Metadata.tables[table_name]["columns"]["both"]
         except KeyError:
-            all_columns = Metadata.columns_properties[table_name]["columns"]
+            all_columns = Metadata.tables[table_name]["columns"]
     elif urban is True:
-        all_columns = Metadata.columns_properties[table_name]["columns"]["urban"]
+        all_columns = Metadata.tables[table_name]["columns"]["urban"]
     elif urban is False:
-        all_columns = Metadata.columns_properties[table_name]["columns"]["rural"]
+        all_columns = Metadata.tables[table_name]["columns"]["rural"]
     try:
         column_property = all_columns[column]
     except KeyError:
         try:
-            missing_treatment = Metadata.columns_properties[table_name]["property"][
+            missing_treatment = Metadata.tables[table_name]["property"][
                 "missings"
             ]
         except KeyError:
@@ -171,7 +171,7 @@ def _clean_table(df: pd.DataFrame, year: int | None = None):
 
 
 def open_table(year: int, table_name: str, urban: bool):
-    table_names = Metadata.columns_properties[table_name]["file_codes"]
+    table_names = Metadata.tables[table_name]["file_codes"]
     table_file_code = table_names[select_version(table_names, year)]
 
     file_name = _build_file_name(year=year, table=table_file_code, urban=urban)
@@ -229,7 +229,7 @@ def apply_columns_properties(table, year, table_name, urban=None):
 def load_table(year: int, table_name: str):
     logging.debug(f"Loading {table_name} for {year}")
     try:
-        urban_rural = Metadata.columns_properties[table_name]["property"]["urban_rural"]
+        urban_rural = Metadata.tables[table_name]["property"]["urban_rural"]
         logging.debug(
             f"{table_name} table in {year} has separated rural and urban property"
         )
