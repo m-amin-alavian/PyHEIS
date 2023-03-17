@@ -107,36 +107,38 @@ def load_table_data(table_name: str, year: int, urban: bool | None = None) -> pd
     tables = []
     for urban_stat in urban_stats:
         file_path = _build_file_path(
-            table_name=table_name, year=year, urban=urban_stat)
+            table_name=table_name, year=year, is_urban=urban_stat)
         tables.append(pd.read_csv(file_path, low_memory=False))
     table = pd.concat(tables, axis="index", ignore_index=True)
     return table
 
 
-def _build_file_path(table_name: str, year: int, urban: bool) -> Path:
-    urban_rural = "U" if urban else "R"
+def _build_file_path(table_name: str, year: int, is_urban: bool) -> Path:
+    urban_rural = "U" if is_urban else "R"
     year_string = year % 100 if year < 1400 else year
-    table_metadata = _get_table_metadata(
-        table_name=table_name, year=year, urban=urban)
+    table_metadata = _get_table_metadata(table_name, year, is_urban)
     file_code = get_metadata_version(table_metadata["file_code"], year)
     file_name = f"{urban_rural}{year_string}{file_code}.csv"
-    file_path = Path(defaults.extracted_data).joinpath(
-        str(year)).joinpath(file_name)
+    file_path = Path(defaults.extracted_data).joinpath(str(year)).joinpath(file_name)
     return file_path
 
 
-def _get_table_metadata(table_name: str, year: int, urban: bool | None = None) -> dict:
+def _get_table_metadata(table_name: str, year: int, is_urban: bool | None = None) -> dict:
     table_metadata = metadata_obj.tables[table_name]
     table_metadata = get_metadata_version(table_metadata, year)
 
-    if urban is True:
+    if is_urban is True:
         table_metadata = (
             table_metadata["urban"] if "urban" in table_metadata else table_metadata
         )
-    if urban is False:
+    if is_urban is False:
         table_metadata = (
             table_metadata["rural"] if "rural" in table_metadata else table_metadata
         )
+
+    table_metadata["table_name"] = table_name
+    table_metadata["year"] = year
+    table_metadata["is_urban"] = is_urban
 
     return table_metadata
 
@@ -153,10 +155,20 @@ def clean_table_with_metadata(table_name: str, year: int) -> pd.DataFrame:
     :rtype: pandas.DataFrame
 
     """
-    table = load_table_data(table_name, year)
+    cleaned_table_list = []
+    for is_urban in [True, False]:
+        table = load_table_data(table_name, year, is_urban)
+        table_metadata = _get_table_metadata(table_name, year, is_urban)
+        cleaned_table = _apply_metadata_to_table(table, table_metadata)
+        cleaned_table_list.append(cleaned_table)
+    final_table = pd.concat(cleaned_table_list, axis="index", ignore_index=True)
+    return final_table
+
+
+def _apply_metadata_to_table(table, table_metadata):
     cleaned_table = pd.DataFrame()
     for column_name, column in table.items():
-        column_metadata = _get_column_metadata(table_name, column_name, year)
+        column_metadata = _get_column_metadata(table_metadata, column_name)
         if column_metadata == "drop":
             continue
         column = _apply_metadata_to_column(column, column_metadata)
@@ -164,10 +176,8 @@ def clean_table_with_metadata(table_name: str, year: int) -> pd.DataFrame:
     return cleaned_table
 
 
-def _get_column_metadata(table_name: str, column_name: str,
-                         year: int, urban: bool | None = None) -> dict:
-    table_metadata = _get_table_metadata(
-        table_name=table_name, year=year, urban=urban)
+def _get_column_metadata(table_metadata: str, column_name: str) -> dict:
+    year = table_metadata['year']
     columns_metadata = table_metadata["columns"]
     columns_metadata = get_metadata_version(columns_metadata, year)
     column_metadata = columns_metadata[column_name]
@@ -192,6 +202,8 @@ def _apply_type_to_column(column: pd.Series, column_metadata: dict) -> pd.Series
     elif column_metadata["type"] == "category":
         new_column = column.astype("Int32").astype("category")
         new_column = new_column.cat.rename_categories(column_metadata["categories"])
+    elif column_metadata["type"] == "string":
+        new_column = column.copy()
     return new_column
 
 
