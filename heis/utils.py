@@ -10,8 +10,10 @@ from zipfile import ZipFile
 from tqdm import tqdm
 import requests
 
-from .metadata import Defaults
+from . import metadata
 
+
+defaults = metadata.Defaults()
 
 def download_file(
     url: str, path: str | Path | None = None, show_progress_bar: bool = False
@@ -32,7 +34,7 @@ def download_file(
         path = Path(path)
         file_name = path.name
     elif path is None:
-        temp_folder = Defaults.root_dir.joinpath("temp")
+        temp_folder = defaults.root_dir.joinpath("temp")
         temp_folder.mkdir(exist_ok=True)
         file_name = url.split("/")[-1]
         path = temp_folder.joinpath(file_name)
@@ -68,15 +70,15 @@ def download_7zip():
     file_name = f"{platform.system()}-{platform.architecture()[0]}.zip"
     file_path = Path().joinpath("temp", file_name)
     file_path = download_file(
-        f"{Defaults.online_dir}/7-Zip/{file_name}",
+        f"{defaults.online_dir}/7-Zip/{file_name}",
         show_progress_bar=True,
     )
     with ZipFile(file_path) as zip_file:
-        zip_file.extractall(Defaults.root_dir)
+        zip_file.extractall(defaults.root_dir)
     file_path.unlink()
 
     if platform.system() == "Linux":
-        Defaults.root_dir.joinpath("7-Zip", "7zz").chmod(0o771)
+        defaults.root_dir.joinpath("7-Zip", "7zz").chmod(0o771)
 
 
 def extract_with_7zip(compressed_file_path: str, output_directory: str) -> None:
@@ -106,7 +108,7 @@ def extract_with_7zip(compressed_file_path: str, output_directory: str) -> None:
             shell=True,
         )
     elif platform.system() == "Linux":
-        seven_zip_file_path = Defaults.root_dir.joinpath("7-Zip", "7zz")
+        seven_zip_file_path = defaults.root_dir.joinpath("7-Zip", "7zz")
         if not seven_zip_file_path.exists():
             download_7zip()
         subprocess.run(
@@ -152,37 +154,10 @@ def build_year_interval(from_year: int | None, to_year: int | None) -> tuple[int
     ValueError: `from_year` must be less than `to_year`.
     """
     if from_year is None and to_year is None:
-        return Defaults.first_year, Defaults.last_year + 1
+        return defaults.first_year, defaults.last_year + 1
     if to_year is None:
         return from_year, from_year + 1
     if to_year < from_year:
         raise ValueError("`from_year` is greater than `to_year`")
 
     return (from_year, to_year + 1)
-
-
-def select_version(dictionary, year: int) -> int | None:
-    if type(dictionary) is not dict:
-        return None
-    pattern_list = list(dictionary.keys())
-    for element in pattern_list:
-        if type(element) is not int:
-            return None
-        elif (element < 1300) or (element > 1500):
-            return None
-
-    selected_pattern = None
-    for pattern in pattern_list:
-        if pattern <= year:
-            if (selected_pattern is None) or (selected_pattern <= pattern):
-                selected_pattern = pattern
-    return selected_pattern
-
-
-def get_version(dictionary, year: int) -> dict:
-    selected_year = select_version(dictionary, year)
-    if selected_year is None:
-        selected_version = dictionary
-    else:
-        selected_version = dictionary[selected_year]
-    return selected_version

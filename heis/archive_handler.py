@@ -14,6 +14,8 @@ import pyodbc
 from . import metadata, utils
 
 
+defaults = metadata.Defaults()
+
 def download_year_files_in_range(
     from_year: int | None = None, to_year: int | None = None, replace: bool = False
 ) -> None:
@@ -33,7 +35,7 @@ def download_year_files_in_range(
 
     """
     from_year, to_year = utils.build_year_interval(from_year, to_year)
-    Path(metadata.Defaults.archive_files).mkdir(exist_ok=True, parents=True)
+    Path(defaults.archive_files).mkdir(exist_ok=True, parents=True)
     for year in range(from_year, to_year):
         _download_year_file(year, replace=replace)
 
@@ -51,9 +53,9 @@ def _download_year_file(year: int, replace: bool = True) -> None:
 
     """
     file_name = f"{year}.rar"
-    file_url = f"{metadata.Defaults.online_dir}/original_files/{file_name}"
-    metadata.Defaults.archive_files.mkdir(parents=True, exist_ok=True)
-    local_path = metadata.Defaults.archive_files.joinpath(file_name)
+    file_url = f"{defaults.online_dir}/original_files/{file_name}"
+    defaults.archive_files.mkdir(parents=True, exist_ok=True)
+    local_path = defaults.archive_files.joinpath(file_name)
     if (not Path(local_path).exists()) or replace:
         utils.download_file(url=file_url, path=local_path, show_progress_bar=True)
 
@@ -85,7 +87,7 @@ def unpack_archive_with_7zip(compressed_file_path: str, output_directory: str) -
             shell=True,
         )
     elif platform.system() == "Linux":
-        seven_zip_file_path = metadata.Defaults.root_dir.joinpath("7-Zip", "7zz")
+        seven_zip_file_path = defaults.root_dir.joinpath("7-Zip", "7zz")
         subprocess.run(
             [
                 seven_zip_file_path,
@@ -134,8 +136,8 @@ def _unpack_yearly_data_archive(year):
     """
     Extracts data archive for the given year.
     """
-    file_path = metadata.Defaults.archive_files.joinpath(f"{year}.rar")
-    year_directory = metadata.Defaults.unpacked_data.joinpath(str(year))
+    file_path = defaults.archive_files.joinpath(f"{year}.rar")
+    year_directory = defaults.unpacked_data.joinpath(str(year))
     if year_directory.exists():
         shutil.rmtree(year_directory)
     year_directory.mkdir(parents=True)
@@ -219,7 +221,7 @@ def extract_table(year, table_name):
         tqdm.write(f"table {table_name} from {year} failed to extract")
         return
     table_name = _change_1380_table_names(year, table_name)
-    year_directory = metadata.Defaults.extracted_data.joinpath(str(year))
+    year_directory = defaults.extracted_data.joinpath(str(year))
     Path(year_directory).mkdir(parents=True, exist_ok=True)
     table.to_csv(year_directory.joinpath(f"{table_name}.csv"), index=False)
 
@@ -251,7 +253,7 @@ def _make_connection_string(year: int):
     else:
         driver = "MDBTools"
 
-    year_directory = metadata.Defaults.unpacked_data.joinpath(str(year))
+    year_directory = defaults.unpacked_data.joinpath(str(year))
     access_file_path = _find_access_file_by_extension(year_directory)
     conn_str = f"DRIVER={{{driver}}};" f"DBQ={access_file_path};"
     return conn_str
