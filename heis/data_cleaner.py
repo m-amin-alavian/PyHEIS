@@ -5,10 +5,11 @@ docstring
 
 from pathlib import Path
 
+from tqdm import tqdm
 import pandas as pd
 import numpy as np
 
-from . import metadata
+from . import metadata, utils
 
 
 defaults = metadata.Defaults()
@@ -74,7 +75,9 @@ def get_metadata_version(metadata_dict: dict, year: int) -> dict:
     return metadata_dict[selected_version]
 
 
-def load_table_data(table_name: str, year: int, urban: bool | None = None) -> pd.DataFrame:
+def load_table_data(
+    table_name: str, year: int, urban: bool | None = None
+) -> pd.DataFrame:
     """
     Reads CSV file(s) containing data for a given table, year, and urban/rural category,
     and returns the data as a pandas DataFrame.
@@ -105,9 +108,8 @@ def load_table_data(table_name: str, year: int, urban: bool | None = None) -> pd
         urban_stats = [urban]
 
     tables = []
-    for urban_stat in urban_stats:
-        file_path = _build_file_path(
-            table_name=table_name, year=year, is_urban=urban_stat)
+    for is_urban in urban_stats:
+        file_path = _build_file_path(table_name, year, is_urban)
         tables.append(pd.read_csv(file_path, low_memory=False))
     table = pd.concat(tables, axis="index", ignore_index=True)
     return table
@@ -119,22 +121,23 @@ def _build_file_path(table_name: str, year: int, is_urban: bool) -> Path:
     table_metadata = _get_table_metadata(table_name, year, is_urban)
     file_code = get_metadata_version(table_metadata["file_code"], year)
     file_name = f"{urban_rural}{year_string}{file_code}.csv"
-    file_path = Path(defaults.extracted_data).joinpath(str(year)).joinpath(file_name)
+    file_path = Path(defaults.extracted_data).joinpath(
+        str(year)).joinpath(file_name)
     return file_path
 
 
-def _get_table_metadata(table_name: str, year: int, is_urban: bool | None = None) -> dict:
+def _get_table_metadata(
+    table_name: str, year: int, is_urban: bool | None = None
+) -> dict:
     table_metadata = metadata_obj.tables[table_name]
     table_metadata = get_metadata_version(table_metadata, year)
 
     if is_urban is True:
-        table_metadata = (
-            table_metadata["urban"] if "urban" in table_metadata else table_metadata
-        )
+        if "urban" in table_metadata:
+            table_metadata = table_metadata["urban"]
     if is_urban is False:
-        table_metadata = (
-            table_metadata["rural"] if "rural" in table_metadata else table_metadata
-        )
+        if "rural" in table_metadata:
+            table_metadata = table_metadata["rural"]
 
     table_metadata["table_name"] = table_name
     table_metadata["year"] = year
@@ -161,7 +164,7 @@ def clean_table_with_metadata(table_name: str, year: int) -> pd.DataFrame:
         table_metadata = _get_table_metadata(table_name, year, is_urban)
         cleaned_table = _apply_metadata_to_table(table, table_metadata)
         cleaned_table_list.append(cleaned_table)
-    final_table = pd.concat(cleaned_table_list, axis="index", ignore_index=True)
+    final_table = pd.concat( cleaned_table_list, ignore_index=True)
     return final_table
 
 
@@ -177,7 +180,7 @@ def _apply_metadata_to_table(table, table_metadata):
 
 
 def _get_column_metadata(table_metadata: str, column_name: str) -> dict:
-    year = table_metadata['year']
+    year = table_metadata["year"]
     columns_metadata = table_metadata["columns"]
     columns_metadata = get_metadata_version(columns_metadata, year)
     column_metadata = columns_metadata[column_name]
@@ -186,7 +189,7 @@ def _get_column_metadata(table_metadata: str, column_name: str) -> dict:
 
 
 def _apply_metadata_to_column(column: pd.Series, column_metadata: dict) -> pd.Series:
-    column = _apply_type_to_column(column=column, column_metadata=column_metadata)
+    column = _apply_type_to_column(column, column_metadata)
     return column
 
 
@@ -214,3 +217,53 @@ def _convert_empty_items_to_nan(column: pd.Series):
     column = column.str.replace(f"[{chars_to_remove}]", "", regex=True)
     column = column.replace(r"\A\s*\Z", np.nan, regex=True)
     return column
+
+
+def parquet_clean_data(
+    table_name: str,
+    from_year: int | None = None,
+    to_year: int | None = None,
+) -> None:
+    """
+    Clean and process data for a specified table and year range, and save it in
+    Parquet format.
+
+    :param table_name: Name of the table to be cleaned and processed.
+    :type table_name: str
+
+    :param from_year: Starting year of the data to be cleaned and processed
+        (inclusive). If not specified, defaults to the earliest year available
+        for the table.
+    :type from_year: int or None
+
+    :param to_year: Ending year of the data to be cleaned and processed
+        (inclusive). If not specified, defaults to the last year.
+    :type to_year: int or None
+
+    :return: None
+
+    :raises FileNotFoundError: If the function is unable to find the specified
+        table(s) CSV file(s).
+
+    :raises Exception: If an error occurs during the cleaning and processing of
+        the data.
+
+    .. note:: The cleaned and processed data will be saved in Parquet format to
+        the `processed_data` directory in the project's default settings.
+
+    .. seealso:: `utils.build_year_interval`, `clean_table_with_metadata`
+
+    """
+    from_year, to_year = utils.build_year_interval(from_year, to_year)
+    pbar = tqdm(total=(to_year - from_year),
+                desc="Preparing ...", unit="Table")
+    for year in range(from_year, to_year):
+        pbar.update()
+        pbar.desc = f"Table: {table_name}, Year: {year}"
+        table = clean_table_with_metadata(table_name, year)
+        Path(defaults.processed_data).mkdir(exist_ok=True)
+        table.to_parquet(
+            defaults.processed_data.joinpath(f"{year}_{table_name}.parquet"),
+            index=False,
+        )
+    pbar.close()
