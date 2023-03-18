@@ -39,9 +39,9 @@ class Metadata:
 
     tables = open_yaml("metadata/tables.yaml")
     maps = open_yaml("metadata/maps.yaml")
-    house_hold_id = open_yaml("metadata/house_hold_id.yaml")
-    commodity_codes = open_yaml("metadata/commodity_codes.yaml")
-    standard_tables = open_yaml("metadata/standard_tables.yaml")
+    household = open_yaml("metadata/household.yaml")
+    commodities = open_yaml("metadata/commodities.yaml")
+    schema = open_yaml("metadata/schema.yaml")
     other = open_yaml("metadata/other.yaml")
 
 
