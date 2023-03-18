@@ -73,3 +73,62 @@ class Defaults:
 
     first_year = settings["first_year"]
     last_year = settings["last_year"]
+
+
+def get_latest_version_year(metadata_dict: dict, year: int) -> int | None:
+    """
+    Retrieve the most recent available version of metadata that matches or
+    precedes the given year, provided that the metadata is versioned.
+
+    :param metadata_dict: A dictionary representing the metadata.
+    :type metadata_dict: dict
+
+    :param year: The year to which the version of the metadata should match or
+        precede.
+    :type year: int
+
+    :return: The version number of the most recent metadata version that
+        matches or precedes the given year, or None if the metadata is not
+        versioned.
+    :rtype: int or None
+
+    """
+    if not isinstance(metadata_dict, dict):
+        return None
+    version_list = list(metadata_dict.keys())
+    for element in version_list:
+        if not isinstance(element, int):
+            return None
+        if (element < 1300) or (element > 1500):
+            return None
+
+    selected_version = 0
+    for version in version_list:
+        if version <= year:
+            selected_version = max(selected_version, version)
+    return selected_version
+
+
+def get_metadata_version(metadata_dict: dict, year: int) -> dict:
+    """
+    Retrieve the metadata version that matches or precedes the given year,
+    returning the complete metadata for that version.
+
+    :param metadata_dict: A dictionary representing the metadata.
+    :type metadata_dict: dict
+
+    :param year: The year to which the version of the metadata should match or
+        precede.
+    :type year: int
+
+    :return: A dictionary containing the complete metadata for the version that
+        matches or precedes the given year. If the metadata is not versioned, the
+        function returns the original metadata dictionary.
+    :rtype: dict
+
+    """
+    selected_version = get_latest_version_year(metadata_dict, year)
+
+    if selected_version is None:
+        return metadata_dict
+    return metadata_dict[selected_version]

@@ -16,65 +16,6 @@ defaults = metadata.Defaults()
 metadata_obj = metadata.Metadata()
 
 
-def get_latest_version_year(metadata_dict: dict, year: int) -> int | None:
-    """
-    Retrieve the most recent available version of metadata that matches or
-    precedes the given year, provided that the metadata is versioned.
-
-    :param metadata_dict: A dictionary representing the metadata.
-    :type metadata_dict: dict
-
-    :param year: The year to which the version of the metadata should match or
-        precede.
-    :type year: int
-
-    :return: The version number of the most recent metadata version that
-        matches or precedes the given year, or None if the metadata is not
-        versioned.
-    :rtype: int or None
-
-    """
-    if not isinstance(metadata_dict, dict):
-        return None
-    version_list = list(metadata_dict.keys())
-    for element in version_list:
-        if not isinstance(element, int):
-            return None
-        if (element < 1300) or (element > 1500):
-            return None
-
-    selected_version = 0
-    for version in version_list:
-        if version <= year:
-            selected_version = max(selected_version, version)
-    return selected_version
-
-
-def get_metadata_version(metadata_dict: dict, year: int) -> dict:
-    """
-    Retrieve the metadata version that matches or precedes the given year,
-    returning the complete metadata for that version.
-
-    :param metadata_dict: A dictionary representing the metadata.
-    :type metadata_dict: dict
-
-    :param year: The year to which the version of the metadata should match or
-        precede.
-    :type year: int
-
-    :return: A dictionary containing the complete metadata for the version that
-        matches or precedes the given year. If the metadata is not versioned, the
-        function returns the original metadata dictionary.
-    :rtype: dict
-
-    """
-    selected_version = get_latest_version_year(metadata_dict, year)
-
-    if selected_version is None:
-        return metadata_dict
-    return metadata_dict[selected_version]
-
-
 def load_table_data(
     table_name: str, year: int, urban: bool | None = None
 ) -> pd.DataFrame:
@@ -119,7 +60,7 @@ def _build_file_path(table_name: str, year: int, is_urban: bool) -> Path:
     urban_rural = "U" if is_urban else "R"
     year_string = year % 100 if year < 1400 else year
     table_metadata = _get_table_metadata(table_name, year, is_urban)
-    file_code = get_metadata_version(table_metadata["file_code"], year)
+    file_code = metadata.get_metadata_version(table_metadata["file_code"], year)
     file_name = f"{urban_rural}{year_string}{file_code}.csv"
     file_path = Path(defaults.extracted_data).joinpath(
         str(year)).joinpath(file_name)
@@ -130,7 +71,7 @@ def _get_table_metadata(
     table_name: str, year: int, is_urban: bool | None = None
 ) -> dict:
     table_metadata = metadata_obj.tables[table_name]
-    table_metadata = get_metadata_version(table_metadata, year)
+    table_metadata = metadata.get_metadata_version(table_metadata, year)
 
     if is_urban is True:
         if "urban" in table_metadata:
@@ -182,9 +123,9 @@ def _apply_metadata_to_table(table, table_metadata):
 def _get_column_metadata(table_metadata: str, column_name: str) -> dict:
     year = table_metadata["year"]
     columns_metadata = table_metadata["columns"]
-    columns_metadata = get_metadata_version(columns_metadata, year)
+    columns_metadata = metadata.get_metadata_version(columns_metadata, year)
     column_metadata = columns_metadata[column_name]
-    column_metadata = get_metadata_version(column_metadata, year)
+    column_metadata = metadata.get_metadata_version(column_metadata, year)
     return column_metadata
 
 
